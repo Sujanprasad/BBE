@@ -242,7 +242,7 @@ Fork → Clone → Create Branch → Commit → Push → Pull Request
 
 # 📜 License
 
-This project is licensed under the MIT License.
+This project is created for student activity purpose, feel free to use it
 
 ---
 
