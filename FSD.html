@@ -1,0 +1,2086 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bhimavaram Budget Explorer – Live Local Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Noto+Sans+Telugu:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ═══════════════════════════════════════════════════
+   DESIGN TOKENS — LIGHT & DARK
+═══════════════════════════════════════════════════ */
+:root {
+  --saffron:        #E8630A;
+  --saffron-l:      #F5882A;
+  --saffron-d:      #B84D00;
+  --gold:           #D4A017;
+  --gold-l:         #F0C040;
+  --deep-green:     #1A4A2E;
+  --green-mid:      #2E6B44;
+  --green-l:        #4A9660;
+
+  /* light palette */
+  --bg:             #FDF5E6;
+  --bg2:            #F2E8D0;
+  --bg3:            #EAD9BA;
+  --surface:        #FFFFFF;
+  --surface2:       #FBF5EC;
+  --border:         #E0CCB0;
+  --text:           #1A0F00;
+  --text-mid:       #3D2B0F;
+  --text-sub:       #7A5C35;
+  --nav-bg:         rgba(26,74,46,0.97);
+  --hero-grad:      linear-gradient(135deg,#1A4A2E 0%,#2E6B44 45%,#5C3A1E 100%);
+  --card-shadow:    0 4px 24px rgba(90,40,0,0.12);
+  --card-shadow-h:  0 10px 36px rgba(90,40,0,0.22);
+  --badge-bg:       rgba(232,99,10,0.10);
+  --tag-bg:         rgba(26,74,46,0.08);
+  --input-bg:       #FFFFFF;
+  --scrollbar-bg:   #E8D5B5;
+  --modal-overlay:  rgba(20,10,0,0.55);
+  --code-bg:        #F5EAD5;
+  transition: background 0.3s, color 0.3s;
+}
+
+[data-theme="dark"] {
+  --bg:             #0E1A12;
+  --bg2:            #131F16;
+  --bg3:            #182519;
+  --surface:        #1C2C1F;
+  --surface2:       #243328;
+  --border:         #2E4535;
+  --text:           #F0E6D0;
+  --text-mid:       #C8B896;
+  --text-sub:       #8A7A60;
+  --nav-bg:         rgba(12,22,14,0.97);
+  --hero-grad:      linear-gradient(135deg,#0A1C0F 0%,#1A3D22 45%,#2A1A0A 100%);
+  --card-shadow:    0 4px 24px rgba(0,0,0,0.4);
+  --card-shadow-h:  0 10px 36px rgba(0,0,0,0.6);
+  --badge-bg:       rgba(232,99,10,0.18);
+  --tag-bg:         rgba(74,150,96,0.12);
+  --input-bg:       #1C2C1F;
+  --scrollbar-bg:   #243328;
+  --modal-overlay:  rgba(0,0,0,0.75);
+  --code-bg:        #1C2C1F;
+}
+
+/* ═══════════════ RESET & BASE ═══════════════ */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  transition: background 0.35s, color 0.35s;
+}
+
+/* Grain overlay */
+body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:9999;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  opacity:0.5;
+}
+
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:var(--scrollbar-bg); }
+::-webkit-scrollbar-thumb { background:var(--saffron); border-radius:3px; }
+
+/* ═══════════════ NAVBAR ═══════════════ */
+#navbar {
+  position:fixed; top:0; left:0; right:0; z-index:900;
+  background: var(--nav-bg);
+  backdrop-filter:blur(16px);
+  height:64px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 2.5rem;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.25);
+  transition: background 0.35s;
+}
+
+.nav-brand {
+  display:flex; align-items:center; gap:0.6rem;
+  font-family:'Yatra One',cursive;
+  font-size:1.3rem;
+  color:var(--gold-l);
+  text-decoration:none;
+}
+.nav-brand em { color:var(--saffron-l); font-style:normal; }
+
+.nav-center {
+  display:flex; gap:0.2rem; list-style:none;
+}
+.nav-center a {
+  color:rgba(240,230,208,0.85);
+  text-decoration:none;
+  font-size:0.8rem; font-weight:500;
+  padding:0.45rem 0.9rem;
+  border-radius:20px;
+  transition:all 0.2s;
+  display:flex; align-items:center; gap:0.35rem;
+}
+.nav-center a:hover, .nav-center a.active {
+  background:var(--saffron);
+  color:#fff;
+}
+
+.nav-right { display:flex; align-items:center; gap:0.8rem; }
+
+/* Search bar */
+.nav-search {
+  display:flex; align-items:center;
+  background: rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.15);
+  border-radius:20px;
+  padding:0.35rem 0.9rem;
+  gap:0.5rem;
+}
+.nav-search input {
+  background:none; border:none; outline:none;
+  color:var(--text); font-family:'Poppins',sans-serif; font-size:0.8rem;
+  width:160px;
+}
+.nav-search input::placeholder { color:rgba(240,230,208,0.45); }
+.nav-search i { color:rgba(240,230,208,0.5); font-size:0.8rem; }
+
+/* Dark mode toggle */
+.dm-toggle {
+  width:44px; height:24px;
+  background:rgba(255,255,255,0.12);
+  border-radius:12px;
+  border:none; cursor:pointer;
+  position:relative;
+  transition:background 0.3s;
+  display:flex; align-items:center;
+  padding:0 3px;
+}
+.dm-toggle::before {
+  content:'☀️';
+  font-size:13px;
+  position:absolute; left:3px;
+  transition:all 0.3s;
+}
+[data-theme="dark"] .dm-toggle::before { content:'🌙'; left:21px; }
+[data-theme="dark"] .dm-toggle { background:rgba(74,150,96,0.4); }
+
+.hamburger { display:none; background:none; border:none; cursor:pointer; color:#fff; font-size:1.3rem; }
+
+/* ═══════════════ LIVE BADGE ═══════════════ */
+.live-dot {
+  width:8px; height:8px; background:#22c55e;
+  border-radius:50%;
+  display:inline-block;
+  box-shadow:0 0 0 3px rgba(34,197,94,0.25);
+  animation: livePulse 1.8s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%,100% { box-shadow:0 0 0 3px rgba(34,197,94,0.25); }
+  50% { box-shadow:0 0 0 7px rgba(34,197,94,0); }
+}
+
+/* ═══════════════ MARQUEE ═══════════════ */
+.marquee-bar {
+  background: linear-gradient(90deg, var(--saffron-d), var(--saffron), var(--saffron-l));
+  padding:7px 0; overflow:hidden; margin-top:64px;
+}
+.marquee-track {
+  display:flex; gap:3rem;
+  animation:ticker 22s linear infinite; white-space:nowrap;
+}
+.marquee-track span {
+  font-size:0.72rem; font-weight:700; color:#fff;
+  letter-spacing:0.09em; text-transform:uppercase;
+  display:flex; align-items:center; gap:0.4rem;
+}
+@keyframes ticker {
+  0% { transform:translateX(0); }
+  100% { transform:translateX(-50%); }
+}
+
+/* ═══════════════ HERO ═══════════════ */
+.hero {
+  min-height:92vh;
+  background: var(--hero-grad);
+  position:relative; overflow:hidden;
+  display:grid; grid-template-columns:1fr 1fr;
+  align-items:center;
+  padding:6rem 5rem 4rem;
+}
+
+.hero-bg-pattern {
+  position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse at 75% 50%, rgba(232,99,10,0.20) 0%, transparent 55%),
+    radial-gradient(ellipse at 20% 80%, rgba(212,160,23,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 0%, rgba(74,150,96,0.08) 0%, transparent 60%);
+}
+
+/* Animated mandala */
+.mandala-wrap {
+  position:absolute; right:-100px; top:50%;
+  transform:translateY(-50%);
+  width:650px; height:650px;
+  opacity:0.06;
+}
+.mandala-outer { animation:spinSlow 50s linear infinite; }
+.mandala-inner { animation:spinSlow 30s linear infinite reverse; transform-origin:center; }
+
+@keyframes spinSlow {
+  from { transform:rotate(0deg); }
+  to   { transform:rotate(360deg); }
+}
+
+/* Floating particles */
+.particle {
+  position:absolute; border-radius:50%;
+  background:rgba(212,160,23,0.25);
+  animation:floatUp linear infinite;
+}
+@keyframes floatUp {
+  0%   { transform:translateY(0) scale(1); opacity:0.5; }
+  100% { transform:translateY(-100vh) scale(0.3); opacity:0; }
+}
+
+.hero-content { position:relative; z-index:1; }
+
+.hero-eyebrow {
+  display:inline-flex; align-items:center; gap:0.5rem;
+  background:rgba(232,99,10,0.22);
+  border:1px solid rgba(232,99,10,0.45);
+  color:var(--saffron-l); font-size:0.72rem; font-weight:700;
+  padding:0.3rem 1rem; border-radius:20px;
+  letter-spacing:0.08em; text-transform:uppercase;
+  margin-bottom:1.4rem;
+  animation:slideIn 0.7s ease both;
+}
+
+.hero h1 {
+  font-family:'Yatra One',cursive;
+  font-size:clamp(2.6rem,4.5vw,4.2rem);
+  color:var(--gold-l);
+  line-height:1.1; margin-bottom:0.8rem;
+  animation:slideIn 0.7s 0.15s ease both;
+}
+.hero h1 em { color:var(--saffron-l); font-style:normal; }
+
+.hero-sub {
+  font-size:1.05rem; color:rgba(240,230,208,0.82);
+  font-weight:300; line-height:1.75;
+  margin-bottom:1.8rem;
+  animation:slideIn 0.7s 0.3s ease both;
+}
+
+/* Weather widget */
+.weather-widget {
+  display:inline-flex; align-items:center; gap:0.8rem;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.18);
+  border-radius:14px;
+  padding:0.7rem 1.2rem;
+  margin-bottom:1.8rem;
+  backdrop-filter:blur(8px);
+  animation:slideIn 0.7s 0.45s ease both;
+  cursor:pointer;
+}
+.weather-widget:hover { background:rgba(255,255,255,0.13); }
+.weather-icon { font-size:1.8rem; }
+.weather-text { font-size:0.78rem; color:rgba(240,230,208,0.85); line-height:1.4; }
+.weather-temp { font-size:1.2rem; font-weight:700; color:var(--gold-l); }
+.weather-refresh { font-size:0.65rem; color:rgba(240,230,208,0.45); cursor:pointer; }
+.weather-refresh:hover { color:var(--gold-l); }
+
+.hero-pills {
+  display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:2rem;
+  animation:slideIn 0.7s 0.5s ease both;
+}
+.hero-pill {
+  background:rgba(255,255,255,0.09);
+  border:1px solid rgba(255,255,255,0.18);
+  color:var(--bg); border-radius:20px;
+  font-size:0.76rem; padding:0.3rem 0.8rem;
+  display:flex; align-items:center; gap:0.3rem;
+}
+
+.hero-cta { display:flex; gap:1rem; flex-wrap:wrap; animation:slideIn 0.7s 0.65s ease both; }
+.btn-primary {
+  background:var(--saffron); color:#fff; border:none;
+  padding:0.85rem 1.8rem; border-radius:30px;
+  font-size:0.88rem; font-weight:600; font-family:'Poppins',sans-serif;
+  cursor:pointer; text-decoration:none;
+  display:inline-flex; align-items:center; gap:0.5rem;
+  box-shadow:0 4px 20px rgba(232,99,10,0.45);
+  transition:all 0.25s;
+}
+.btn-primary:hover { transform:translateY(-3px); box-shadow:0 8px 30px rgba(232,99,10,0.55); background:var(--saffron-d); }
+
+.btn-outline {
+  background:transparent; color:var(--gold-l);
+  border:1.5px solid rgba(212,160,23,0.6);
+  padding:0.85rem 1.8rem; border-radius:30px;
+  font-size:0.88rem; font-weight:500; font-family:'Poppins',sans-serif;
+  cursor:pointer; text-decoration:none;
+  display:inline-flex; align-items:center; gap:0.5rem;
+  transition:all 0.25s;
+}
+.btn-outline:hover { background:rgba(212,160,23,0.12); transform:translateY(-3px); }
+
+/* Hero right — stats + live feed */
+.hero-right { position:relative; z-index:1; animation:slideIn 0.7s 0.3s ease both; }
+
+.stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+
+.stat-card {
+  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.13);
+  border-radius:18px; padding:1.5rem;
+  backdrop-filter:blur(10px);
+  transition:transform 0.25s, background 0.25s;
+  cursor:default;
+}
+.stat-card:hover { transform:translateY(-5px); background:rgba(255,255,255,0.11); }
+.stat-card:nth-child(even) { margin-top:1.5rem; }
+
+.stat-icon { font-size:1.8rem; margin-bottom:0.5rem; }
+.stat-num { font-family:'Yatra One',cursive; font-size:1.8rem; color:var(--gold-l); line-height:1; }
+.stat-label { font-size:0.72rem; color:rgba(240,230,208,0.6); margin-top:0.3rem; }
+
+.live-feed {
+  background:rgba(0,0,0,0.25);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:14px;
+  padding:1rem 1.2rem;
+  margin-top:1rem;
+  font-size:0.75rem;
+  color:rgba(240,230,208,0.7);
+}
+.live-feed-title { display:flex; align-items:center; gap:0.5rem; font-weight:700; color:var(--gold-l); margin-bottom:0.6rem; font-size:0.78rem; }
+.feed-item { padding:0.35rem 0; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; gap:0.5rem; }
+.feed-item:last-child { border:none; }
+.feed-time { color:var(--saffron-l); font-weight:600; font-size:0.7rem; min-width:42px; }
+
+@keyframes slideIn {
+  from { opacity:0; transform:translateY(22px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ═══════════════ WHO SECTION ═══════════════ */
+.who-section {
+  background: var(--deep-green);
+  padding:3.5rem 5rem;
+}
+[data-theme="dark"] .who-section { background:#0D1C10; }
+
+.who-section h2 { font-family:'Yatra One',cursive; font-size:1.6rem; color:var(--gold-l); text-align:center; margin-bottom:2rem; }
+.who-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1.2rem; max-width:1100px; margin:0 auto; }
+.who-card {
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:16px; padding:1.8rem 1.2rem;
+  text-align:center; transition:all 0.3s; cursor:default;
+}
+.who-card:hover { background:rgba(232,99,10,0.15); border-color:var(--saffron); transform:translateY(-5px); }
+.who-icon { font-size:2.2rem; margin-bottom:0.7rem; }
+.who-title { font-size:0.88rem; font-weight:600; color:#f0e6d0; margin-bottom:0.3rem; }
+.who-desc { font-size:0.72rem; color:rgba(240,230,208,0.55); line-height:1.55; }
+
+/* ═══════════════ SHARED SECTION STYLES ═══════════════ */
+section { padding:5rem 5rem; }
+
+.section-header { text-align:center; margin-bottom:3rem; }
+.eyebrow {
+  display:inline-block; font-size:0.7rem; font-weight:700;
+  letter-spacing:0.12em; text-transform:uppercase;
+  color:var(--saffron); background:var(--badge-bg);
+  padding:0.3rem 1rem; border-radius:20px; margin-bottom:0.8rem;
+}
+.sec-title {
+  font-family:'Yatra One',cursive;
+  font-size:clamp(1.7rem,2.8vw,2.4rem);
+  color:var(--deep-green); margin-bottom:0.5rem;
+}
+[data-theme="dark"] .sec-title { color:var(--gold-l); }
+.sec-sub { font-size:0.9rem; color:var(--text-sub); max-width:480px; margin:0 auto; line-height:1.7; }
+
+/* ═══════════════ TABS + SEARCH ═══════════════ */
+.controls-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap:1rem; margin-bottom:2rem;
+  max-width:1200px; margin-left:auto; margin-right:auto;
+  margin-bottom:2rem;
+}
+
+.filter-tabs { display:flex; gap:0.4rem; flex-wrap:wrap; }
+.ftab {
+  background:var(--surface); border:1.5px solid var(--border);
+  color:var(--text-sub); padding:0.45rem 1.1rem;
+  border-radius:20px; font-size:0.8rem; font-weight:500;
+  font-family:'Poppins',sans-serif; cursor:pointer;
+  transition:all 0.2s;
+}
+.ftab:hover, .ftab.active { background:var(--saffron); border-color:var(--saffron); color:#fff; }
+
+.section-search {
+  display:flex; align-items:center; gap:0.5rem;
+  background:var(--surface); border:1.5px solid var(--border);
+  border-radius:20px; padding:0.4rem 1rem;
+}
+.section-search input {
+  background:none; border:none; outline:none;
+  font-family:'Poppins',sans-serif; font-size:0.8rem;
+  color:var(--text); width:180px;
+}
+.section-search input::placeholder { color:var(--text-sub); }
+.section-search i { color:var(--text-sub); font-size:0.8rem; }
+
+/* ═══════════════ CARDS GRID ═══════════════ */
+.cards-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1.5rem; max-width:1200px; margin:0 auto; }
+
+/* ── FOOD CARDS ── */
+.food-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px; overflow:hidden;
+  box-shadow:var(--card-shadow);
+  transition:all 0.3s; cursor:pointer;
+  position:relative;
+}
+.food-card:hover { transform:translateY(-7px); box-shadow:var(--card-shadow-h); }
+
+.fc-header {
+  background:linear-gradient(135deg,var(--saffron-d),var(--saffron));
+  padding:1.2rem 1.4rem;
+  display:flex; justify-content:space-between; align-items:flex-start;
+}
+.fc-name { font-size:1rem; font-weight:700; color:#fff; }
+.fc-type { font-size:0.7rem; color:rgba(255,255,255,0.75); margin-top:0.15rem; }
+.fc-badge {
+  background:var(--gold); color:#3d1e00;
+  font-size:0.72rem; font-weight:700;
+  padding:0.25rem 0.65rem; border-radius:10px;
+  white-space:nowrap; flex-shrink:0;
+}
+
+.fc-body { padding:1.1rem 1.4rem; }
+.fc-row { display:flex; align-items:center; gap:0.4rem; font-size:0.78rem; color:var(--text-sub); margin-bottom:0.35rem; }
+.fc-dish { font-size:0.82rem; font-weight:600; color:var(--saffron-d); margin-top:0.5rem; }
+[data-theme="dark"] .fc-dish { color:var(--saffron-l); }
+
+.fc-footer {
+  padding:0.7rem 1.4rem;
+  border-top:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.rating-stars { color:var(--gold); font-size:0.72rem; }
+.rating-count { font-size:0.68rem; color:var(--text-sub); }
+.fc-tag {
+  font-size:0.65rem; font-weight:700; letter-spacing:0.05em;
+  padding:0.18rem 0.55rem; border-radius:8px;
+  text-transform:uppercase;
+}
+.tag-veg { background:rgba(34,197,94,0.12); color:#16a34a; border:1px solid rgba(34,197,94,0.25); }
+.tag-nonveg { background:rgba(232,99,10,0.1); color:var(--saffron-d); border:1px solid rgba(232,99,10,0.2); }
+
+/* Popular ribbon */
+.ribbon {
+  position:absolute; top:0; right:0;
+  background:var(--gold); color:#3d1e00;
+  font-size:0.6rem; font-weight:800;
+  padding:0.2rem 0.8rem; letter-spacing:0.07em; text-transform:uppercase;
+  border-radius:0 20px 0 12px;
+}
+
+/* Quick stops */
+.quick-stops-section {
+  max-width:1200px; margin:2.5rem auto 0;
+  background:linear-gradient(135deg,var(--deep-green),var(--green-mid));
+  border-radius:22px; padding:2rem;
+}
+[data-theme="dark"] .quick-stops-section { background:linear-gradient(135deg,#0D1C10,#1A3D22); }
+.qs-title { font-family:'Yatra One',cursive; color:var(--gold-l); font-size:1.2rem; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem; }
+.qs-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:0.8rem; }
+.qs-item {
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.14);
+  border-radius:12px; padding:0.9rem 1.1rem;
+  color:rgba(240,230,208,0.85); font-size:0.78rem;
+}
+.qs-item strong { display:block; color:var(--gold-l); font-size:0.82rem; margin-bottom:0.2rem; }
+
+/* ── TEMPLE CARDS ── */
+#temples { background:var(--bg2); }
+
+.today-temple-card {
+  max-width:1200px; margin:0 auto 2.5rem;
+  background:linear-gradient(135deg,var(--deep-green),var(--green-mid));
+  border-radius:24px; padding:2.5rem;
+  display:flex; align-items:center; gap:2rem;
+  box-shadow:var(--card-shadow-h);
+  position:relative; overflow:hidden;
+}
+[data-theme="dark"] .today-temple-card { background:linear-gradient(135deg,#0D1C10,#1A3D22); border:1px solid #2E4535; }
+.today-temple-card::before {
+  content:'🕉️'; position:absolute; right:2rem; top:50%;
+  transform:translateY(-50%); font-size:9rem; opacity:0.06;
+  pointer-events:none;
+}
+.tt-glow {
+  width:74px; height:74px; flex-shrink:0;
+  background:var(--gold); border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:2.4rem;
+  box-shadow:0 0 0 8px rgba(212,160,23,0.2);
+  animation:goldenPulse 2.5s ease-in-out infinite;
+}
+@keyframes goldenPulse {
+  0%,100% { box-shadow:0 0 0 8px rgba(212,160,23,0.2); }
+  50%      { box-shadow:0 0 0 18px rgba(212,160,23,0); }
+}
+.tt-label { font-size:0.7rem; font-weight:700; letter-spacing:0.1em; color:var(--gold-l); text-transform:uppercase; margin-bottom:0.35rem; }
+.tt-name { font-family:'Yatra One',cursive; font-size:1.7rem; color:#fff; margin-bottom:0.3rem; }
+.tt-desc { font-size:0.83rem; color:rgba(240,230,208,0.78); line-height:1.65; }
+
+.temple-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1.5rem; max-width:1200px; margin:0 auto; }
+
+.tc {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:20px; overflow:hidden;
+  box-shadow:var(--card-shadow); transition:all 0.3s; cursor:pointer;
+}
+.tc:hover { transform:translateY(-6px); box-shadow:var(--card-shadow-h); }
+
+.tc-top {
+  background:linear-gradient(135deg,var(--deep-green),var(--green-mid));
+  padding:1.3rem 1.4rem; display:flex; align-items:center; gap:1rem;
+}
+[data-theme="dark"] .tc-top { background:linear-gradient(135deg,#1A3D22,#2E6B44); }
+.tc-icon {
+  width:54px; height:54px; flex-shrink:0;
+  background:rgba(212,160,23,0.2);
+  border:2px solid rgba(212,160,23,0.35);
+  border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:1.5rem;
+}
+.tc-name { font-size:0.95rem; font-weight:700; color:#fff; }
+.tc-deity { font-size:0.72rem; color:var(--gold-l); margin-top:0.18rem; }
+
+.tc-body { padding:1.1rem 1.4rem; }
+.tc-row { display:flex; align-items:flex-start; gap:0.4rem; font-size:0.78rem; color:var(--text-sub); margin-bottom:0.45rem; line-height:1.5; }
+.tc-row i { margin-top:2px; color:var(--saffron); flex-shrink:0; }
+.tc-auspicious {
+  display:inline-flex; align-items:center; gap:0.35rem;
+  background:rgba(212,160,23,0.1); border:1px solid rgba(212,160,23,0.28);
+  color:var(--gold); font-size:0.7rem; font-weight:600;
+  padding:0.22rem 0.65rem; border-radius:9px; margin-top:0.5rem;
+}
+
+/* ── VIEWPOINTS ── */
+#viewpoints { background:var(--bg); }
+
+.vc-wrap { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:1.5rem; max-width:1200px; margin:0 auto; }
+
+.vc {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:20px; overflow:hidden;
+  box-shadow:var(--card-shadow); transition:all 0.3s; cursor:pointer;
+}
+.vc:hover { transform:translateY(-6px); box-shadow:var(--card-shadow-h); }
+
+.vc-img {
+  height:155px; display:flex; align-items:center; justify-content:center;
+  font-size:4.5rem; position:relative;
+}
+.vc-img.lake    { background:linear-gradient(135deg,#0c4a6e,#0369a1,#38bdf8); }
+.vc-img.park    { background:linear-gradient(135deg,#14532d,#16a34a,#4ade80); }
+.vc-img.river   { background:linear-gradient(135deg,#1e3a5f,#1d4ed8,#60a5fa); }
+.vc-img.historic{ background:linear-gradient(135deg,#7c2d12,#c2410c,#fb923c); }
+.vc-img.canal   { background:linear-gradient(135deg,#134e4a,#0d9488,#5eead4); }
+.vc-img.viewpt  { background:linear-gradient(135deg,#4a044e,#7e22ce,#c084fc); }
+
+.vc-tag-row { position:absolute; top:0.7rem; left:0.7rem; display:flex; gap:0.35rem; flex-wrap:wrap; }
+.vtag { font-size:0.6rem; font-weight:700; padding:0.18rem 0.55rem; border-radius:7px; letter-spacing:0.04em; }
+.vtag-peaceful { background:rgba(22,163,74,0.88); color:#fff; }
+.vtag-photo    { background:rgba(232,99,10,0.9); color:#fff; }
+.vtag-free     { background:rgba(212,160,23,0.9); color:#3d1e00; }
+.vtag-paid     { background:rgba(60,20,0,0.8); color:#fff; }
+
+.vc-body { padding:1.1rem 1.4rem; }
+.vc-name { font-size:0.98rem; font-weight:700; color:var(--text); margin-bottom:0.6rem; }
+.vc-row { display:flex; align-items:center; gap:0.4rem; font-size:0.77rem; color:var(--text-sub); margin-bottom:0.32rem; }
+.vc-row i { color:var(--saffron); font-size:0.7rem; flex-shrink:0; }
+.vc-tip {
+  background:rgba(232,99,10,0.07); border-left:3px solid var(--saffron);
+  padding:0.55rem 0.8rem; border-radius:0 8px 8px 0;
+  font-size:0.74rem; color:var(--saffron-d); font-style:italic;
+  margin-top:0.8rem; line-height:1.5;
+}
+[data-theme="dark"] .vc-tip { background:rgba(232,99,10,0.1); color:var(--saffron-l); }
+
+/* ═══════════════ MAP SECTION ═══════════════ */
+#map-section { background:var(--bg2); }
+
+.map-wrap {
+  max-width:1200px; margin:0 auto;
+  display:grid; grid-template-columns:1fr 2fr; gap:2rem; align-items:start;
+}
+
+.map-sidebar { display:flex; flex-direction:column; gap:0.8rem; }
+.map-filter-btn {
+  background:var(--surface); border:1.5px solid var(--border);
+  border-radius:12px; padding:0.8rem 1rem;
+  display:flex; align-items:center; gap:0.7rem;
+  cursor:pointer; transition:all 0.2s; width:100%;
+  font-family:'Poppins',sans-serif;
+}
+.map-filter-btn:hover, .map-filter-btn.active {
+  border-color:var(--saffron); background:rgba(232,99,10,0.07);
+}
+.map-filter-btn i { color:var(--saffron); width:16px; }
+.mfb-label { font-size:0.82rem; font-weight:600; color:var(--text); }
+.mfb-count { font-size:0.7rem; color:var(--text-sub); }
+
+.map-frame {
+  border-radius:20px; overflow:hidden;
+  border:2px solid var(--border);
+  box-shadow:var(--card-shadow);
+  height:400px;
+}
+.map-frame iframe { width:100%; height:100%; border:none; filter:var(--map-filter,none); }
+[data-theme="dark"] .map-frame iframe { filter:invert(92%) hue-rotate(180deg) saturate(0.8); }
+
+/* ═══════════════ BUDGET PLANNER ═══════════════ */
+#budget { background:var(--deep-green); }
+[data-theme="dark"] #budget { background:#0A1409; }
+
+#budget .sec-title { color:var(--gold-l); }
+#budget .eyebrow { background:rgba(212,160,23,0.15); color:var(--gold-l); }
+#budget .sec-sub { color:rgba(240,230,208,0.65); }
+
+.planner-container { max-width:960px; margin:0 auto; }
+
+.planner-card {
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:24px; padding:2.5rem;
+  margin-bottom:1.5rem;
+}
+
+.planner-presets { display:flex; gap:0.7rem; flex-wrap:wrap; margin-bottom:1.8rem; }
+.preset {
+  background:rgba(212,160,23,0.12);
+  border:1.5px solid rgba(212,160,23,0.3);
+  color:var(--gold-l); padding:0.45rem 1.1rem;
+  border-radius:20px; font-size:0.78rem; font-weight:600;
+  font-family:'Poppins',sans-serif; cursor:pointer; transition:all 0.2s;
+}
+.preset:hover { background:var(--gold); color:#3d1e00; border-color:var(--gold); }
+.preset.sel   { background:var(--gold); color:#3d1e00; border-color:var(--gold); }
+
+.planner-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem; }
+
+.pf-label {
+  display:block; font-size:0.75rem; font-weight:700;
+  color:var(--gold-l); letter-spacing:0.07em; text-transform:uppercase; margin-bottom:0.5rem;
+}
+.pf-input, .pf-select {
+  width:100%; background:rgba(255,255,255,0.07);
+  border:1.5px solid rgba(255,255,255,0.18);
+  color:#f0e6d0; padding:0.75rem 1rem;
+  border-radius:12px; font-size:0.88rem; font-family:'Poppins',sans-serif;
+  outline:none; transition:border-color 0.2s; -webkit-appearance:none;
+}
+.pf-input:focus, .pf-select:focus { border-color:var(--gold); }
+.pf-select option { background:#1A4A2E; color:#f0e6d0; }
+
+/* Traveler toggle */
+.traveler-row {
+  display:flex; align-items:center; gap:0.9rem;
+  background:rgba(232,99,10,0.1); border:1px solid rgba(232,99,10,0.25);
+  border-radius:13px; padding:0.85rem 1.2rem; cursor:pointer;
+  margin-bottom:1.5rem; transition:background 0.2s;
+}
+.traveler-row:hover { background:rgba(232,99,10,0.16); }
+.ts-switch {
+  width:44px; height:24px; flex-shrink:0;
+  background:rgba(255,255,255,0.18); border-radius:12px;
+  position:relative; transition:background 0.2s;
+}
+.ts-switch.on { background:var(--saffron); }
+.ts-dot {
+  width:18px; height:18px; background:#fff; border-radius:50%;
+  position:absolute; top:3px; left:3px; transition:left 0.2s;
+}
+.ts-switch.on .ts-dot { left:23px; }
+.ts-label { font-size:0.83rem; color:rgba(240,230,208,0.9); font-weight:500; }
+.ts-label small { display:block; font-size:0.7rem; color:rgba(240,230,208,0.5); }
+
+.gen-btn {
+  width:100%; background:var(--saffron); color:#fff; border:none;
+  padding:1rem; border-radius:13px; font-size:0.92rem; font-weight:700;
+  font-family:'Poppins',sans-serif; cursor:pointer;
+  box-shadow:0 4px 20px rgba(232,99,10,0.4);
+  transition:all 0.25s; display:flex; align-items:center; justify-content:center; gap:0.5rem;
+}
+.gen-btn:hover { background:var(--saffron-d); transform:translateY(-2px); box-shadow:0 6px 28px rgba(232,99,10,0.5); }
+
+/* Plan output */
+.plan-out {
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:20px; padding:2rem;
+  display:none;
+}
+.plan-out.show { display:block; animation:slideIn 0.4s ease; }
+
+.bbar-wrap { margin-bottom:1.8rem; }
+.bbar-labels { display:flex; justify-content:space-between; margin-bottom:0.4rem; }
+.bbar-labels span { font-size:0.78rem; color:rgba(240,230,208,0.7); }
+.bbar-labels strong { font-size:0.78rem; color:var(--gold-l); }
+.bbar { height:10px; background:rgba(255,255,255,0.08); border-radius:5px; overflow:hidden; }
+.bbar-fill { height:100%; background:linear-gradient(90deg,var(--saffron),var(--gold)); border-radius:5px; width:0; transition:width 0.8s ease; }
+
+.day-block { margin-bottom:1.8rem; }
+.day-block-header {
+  font-family:'Yatra One',cursive; color:var(--gold-l);
+  font-size:1.05rem; margin-bottom:0.8rem;
+  display:flex; align-items:center; gap:0.5rem;
+}
+.day-block-header small { font-family:'Poppins',sans-serif; font-size:0.72rem; color:rgba(240,230,208,0.5); font-weight:400; }
+
+.slot {
+  background:rgba(255,255,255,0.04); border-radius:11px;
+  padding:0.75rem 1.1rem; margin-bottom:0.5rem;
+  display:flex; align-items:center; justify-content:space-between;
+  border:1px solid rgba(255,255,255,0.06);
+  transition:background 0.2s;
+}
+.slot:hover { background:rgba(255,255,255,0.07); }
+.slot-l { display:flex; align-items:center; gap:0.7rem; }
+.slot-time { font-size:0.68rem; font-weight:700; color:var(--saffron-l); text-transform:uppercase; letter-spacing:0.07em; min-width:68px; }
+.slot-act { font-size:0.82rem; color:rgba(240,230,208,0.85); }
+.slot-cost { font-size:0.85rem; font-weight:700; color:var(--gold-l); }
+.slot-free { font-size:0.85rem; font-weight:600; color:#4ade80; }
+
+.plan-footer {
+  border-top:1px solid rgba(255,255,255,0.1);
+  padding-top:1rem; display:flex; justify-content:space-between; align-items:center;
+}
+.plan-footer span { font-size:0.85rem; color:rgba(240,230,208,0.6); }
+.plan-footer strong { font-family:'Yatra One',cursive; font-size:1.15rem; color:var(--gold-l); }
+
+/* share btn */
+.share-btn {
+  background:rgba(212,160,23,0.15); border:1px solid rgba(212,160,23,0.3);
+  color:var(--gold-l); padding:0.5rem 1.1rem; border-radius:20px;
+  font-size:0.78rem; font-weight:600; font-family:'Poppins',sans-serif;
+  cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:0.4rem;
+}
+.share-btn:hover { background:var(--gold); color:#3d1e00; border-color:var(--gold); }
+
+/* ═══════════════ REVIEWS ═══════════════ */
+#reviews { background:var(--bg2); }
+
+.reviews-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1.5rem; max-width:1200px; margin:0 auto 2.5rem; }
+
+.review-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:18px; padding:1.5rem;
+  box-shadow:var(--card-shadow); transition:all 0.25s;
+}
+.review-card:hover { transform:translateY(-4px); box-shadow:var(--card-shadow-h); }
+
+.rv-top { display:flex; align-items:center; gap:0.8rem; margin-bottom:1rem; }
+.rv-avatar {
+  width:44px; height:44px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.3rem; flex-shrink:0;
+}
+.rv-name { font-size:0.88rem; font-weight:700; color:var(--text); }
+.rv-from { font-size:0.7rem; color:var(--text-sub); }
+.rv-stars { color:var(--gold); font-size:0.75rem; margin-bottom:0.6rem; }
+.rv-text { font-size:0.8rem; color:var(--text-mid); line-height:1.65; font-style:italic; }
+[data-theme="dark"] .rv-text { color:var(--text-sub); }
+.rv-place { font-size:0.7rem; color:var(--saffron); font-weight:600; margin-top:0.7rem; display:flex; align-items:center; gap:0.3rem; }
+
+/* Add review */
+.add-review-card {
+  max-width:700px; margin:0 auto;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:20px; padding:2rem;
+  box-shadow:var(--card-shadow);
+}
+.ar-title { font-family:'Yatra One',cursive; color:var(--deep-green); font-size:1.3rem; margin-bottom:1.2rem; }
+[data-theme="dark"] .ar-title { color:var(--gold-l); }
+.ar-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem; }
+.ar-input, .ar-textarea, .ar-sel {
+  width:100%; background:var(--bg); border:1.5px solid var(--border);
+  border-radius:10px; padding:0.7rem 1rem;
+  font-family:'Poppins',sans-serif; font-size:0.82rem; color:var(--text);
+  outline:none; transition:border-color 0.2s;
+}
+.ar-input:focus, .ar-textarea:focus, .ar-sel:focus { border-color:var(--saffron); }
+.ar-textarea { resize:vertical; min-height:90px; }
+.ar-sel option { background:var(--surface); }
+
+.star-picker { display:flex; gap:0.3rem; margin-bottom:1rem; cursor:pointer; }
+.star-picker i { font-size:1.3rem; color:var(--border); transition:color 0.15s; }
+.star-picker i.lit { color:var(--gold); }
+
+/* ═══════════════ NEWSLETTER ═══════════════ */
+.newsletter {
+  background:linear-gradient(135deg,var(--deep-green),var(--green-mid));
+  margin:0 5rem 5rem;
+  border-radius:24px; padding:3rem;
+  display:flex; align-items:center; justify-content:space-between; gap:2rem;
+  flex-wrap:wrap;
+}
+[data-theme="dark"] .newsletter { background:linear-gradient(135deg,#0D1C10,#1A3D22); border:1px solid #2E4535; }
+
+.nl-text h3 { font-family:'Yatra One',cursive; font-size:1.6rem; color:var(--gold-l); margin-bottom:0.4rem; }
+.nl-text p { font-size:0.85rem; color:rgba(240,230,208,0.7); }
+.nl-form { display:flex; gap:0.6rem; flex-wrap:wrap; }
+.nl-input {
+  background:rgba(255,255,255,0.1); border:1.5px solid rgba(255,255,255,0.2);
+  border-radius:10px; padding:0.7rem 1.1rem;
+  color:#f0e6d0; font-family:'Poppins',sans-serif; font-size:0.85rem;
+  width:240px; outline:none; transition:border-color 0.2s;
+}
+.nl-input:focus { border-color:var(--gold); }
+.nl-input::placeholder { color:rgba(240,230,208,0.4); }
+
+/* ═══════════════ FOOTER ═══════════════ */
+footer {
+  background:var(--text);
+  color:rgba(240,230,208,0.65);
+  padding:3rem 5rem;
+}
+[data-theme="dark"] footer { background:#050A06; }
+
+.footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:3rem; margin-bottom:2.5rem; }
+.footer-brand h3 { font-family:'Yatra One',cursive; font-size:1.4rem; color:var(--gold-l); margin-bottom:0.5rem; }
+.footer-brand p { font-size:0.78rem; line-height:1.7; }
+.footer-col h4 { font-size:0.8rem; font-weight:700; color:rgba(240,230,208,0.9); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:0.8rem; }
+.footer-col a { display:block; font-size:0.78rem; color:rgba(240,230,208,0.5); text-decoration:none; margin-bottom:0.4rem; transition:color 0.2s; }
+.footer-col a:hover { color:var(--saffron-l); }
+.footer-bottom { border-top:1px solid rgba(255,255,255,0.08); padding-top:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; }
+.footer-bottom p { font-size:0.75rem; }
+.social-links { display:flex; gap:0.7rem; }
+.soc-btn {
+  width:34px; height:34px; border-radius:50%;
+  background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.1);
+  display:flex; align-items:center; justify-content:center;
+  color:rgba(240,230,208,0.6); font-size:0.8rem;
+  text-decoration:none; transition:all 0.2s;
+}
+.soc-btn:hover { background:var(--saffron); color:#fff; border-color:var(--saffron); transform:translateY(-2px); }
+
+/* ═══════════════ MODAL ═══════════════ */
+.modal-overlay {
+  position:fixed; inset:0; z-index:1000;
+  background:var(--modal-overlay); backdrop-filter:blur(6px);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity 0.3s;
+}
+.modal-overlay.open { opacity:1; pointer-events:all; }
+.modal {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:24px; width:min(620px,92vw); max-height:85vh;
+  overflow-y:auto; padding:2.5rem;
+  box-shadow:0 24px 80px rgba(0,0,0,0.4);
+  transform:translateY(20px) scale(0.97);
+  transition:transform 0.3s;
+}
+.modal-overlay.open .modal { transform:translateY(0) scale(1); }
+.modal-close {
+  position:absolute; top:1.2rem; right:1.2rem;
+  background:var(--bg2); border:1px solid var(--border); border-radius:50%;
+  width:36px; height:36px; display:flex; align-items:center; justify-content:center;
+  cursor:pointer; font-size:1rem; color:var(--text-sub); transition:all 0.2s;
+}
+.modal-close:hover { background:var(--saffron); color:#fff; border-color:var(--saffron); }
+.modal-header { font-family:'Yatra One',cursive; font-size:1.5rem; color:var(--deep-green); margin-bottom:1.2rem; }
+[data-theme="dark"] .modal-header { color:var(--gold-l); }
+
+/* ═══════════════ BACK TO TOP + TOAST ═══════════════ */
+#backTop {
+  position:fixed; bottom:2rem; right:2rem; z-index:800;
+  width:48px; height:48px; border-radius:50%; border:none;
+  background:var(--saffron); color:#fff; font-size:1.1rem;
+  cursor:pointer; display:none; align-items:center; justify-content:center;
+  box-shadow:0 4px 18px rgba(232,99,10,0.5); transition:all 0.2s;
+}
+#backTop.show { display:flex; }
+#backTop:hover { transform:translateY(-3px); background:var(--saffron-d); }
+
+.toast {
+  position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(80px);
+  background:var(--text); color:#f0e6d0; border-radius:10px;
+  padding:0.75rem 1.4rem; font-size:0.82rem; font-weight:500;
+  box-shadow:0 8px 30px rgba(0,0,0,0.3); z-index:1100;
+  transition:transform 0.3s ease;
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+
+/* ═══════════════ MOBILE NAV DRAWER ═══════════════ */
+.mobile-nav {
+  position:fixed; top:64px; left:0; right:0; bottom:0; z-index:800;
+  background:var(--nav-bg); backdrop-filter:blur(20px);
+  padding:2rem;
+  transform:translateX(-100%); transition:transform 0.3s;
+  display:flex; flex-direction:column; gap:0.5rem;
+}
+.mobile-nav.open { transform:translateX(0); }
+.mobile-nav a { color:rgba(240,230,208,0.85); text-decoration:none; font-size:1rem; font-weight:500; padding:0.8rem 1rem; border-radius:12px; display:flex; align-items:center; gap:0.7rem; transition:background 0.2s; }
+.mobile-nav a:hover { background:rgba(232,99,10,0.2); color:#fff; }
+
+/* ═══════════════ SCROLL ANIMATIONS ═══════════════ */
+.reveal { opacity:0; transform:translateY(28px); transition:opacity 0.55s ease, transform 0.55s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+/* ═══════════════ RESPONSIVE ═══════════════ */
+@media(max-width:1024px) {
+  section, .who-section { padding:4rem 3rem; }
+  .hero { padding:5rem 3rem 3rem; }
+  .footer-grid { grid-template-columns:1fr 1fr; }
+  .newsletter { margin:0 3rem 4rem; }
+}
+@media(max-width:768px) {
+  .hero { grid-template-columns:1fr; }
+  .hero-right { display:none; }
+  .nav-center, .nav-search { display:none; }
+  .hamburger { display:block; }
+  .who-grid { grid-template-columns:1fr 1fr; }
+  section, .who-section { padding:3.5rem 1.5rem; }
+  .hero { padding:5rem 1.5rem 3rem; }
+  .map-wrap { grid-template-columns:1fr; }
+  .planner-grid, .ar-grid { grid-template-columns:1fr; }
+  .footer-grid { grid-template-columns:1fr; gap:2rem; }
+  .newsletter { margin:0 1.5rem 3rem; flex-direction:column; }
+  .today-temple-card { flex-direction:column; text-align:center; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ NAVBAR ═══════════ -->
+<nav id="navbar">
+  <a class="nav-brand" href="#home">🪷 <em>Bhimavaram</em> Explorer</a>
+  <ul class="nav-center">
+    <li><a href="#food"><i class="fas fa-utensils"></i> Food</a></li>
+    <li><a href="#temples"><i class="fas fa-gopuram"></i> Temples</a></li>
+    <li><a href="#viewpoints"><i class="fas fa-mountain-sun"></i> Views</a></li>
+    <li><a href="#map-section"><i class="fas fa-map-location-dot"></i> Map</a></li>
+    <li><a href="#budget"><i class="fas fa-wallet"></i> Budget</a></li>
+    <li><a href="#reviews"><i class="fas fa-star"></i> Reviews</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="nav-search">
+      <i class="fas fa-search"></i>
+      <input type="text" id="globalSearch" placeholder="Search places…" oninput="globalSearchFn(this.value)">
+    </div>
+    <button class="dm-toggle" onclick="toggleDark()" title="Toggle dark mode"></button>
+    <button class="hamburger" onclick="toggleMobileNav()"><i class="fas fa-bars"></i></button>
+  </div>
+</nav>
+
+<!-- Mobile nav drawer -->
+<div class="mobile-nav" id="mobileNav">
+  <a href="#food" onclick="closeMobileNav()"><i class="fas fa-utensils"></i> Food</a>
+  <a href="#temples" onclick="closeMobileNav()"><i class="fas fa-gopuram"></i> Temples</a>
+  <a href="#viewpoints" onclick="closeMobileNav()"><i class="fas fa-mountain-sun"></i> Viewpoints</a>
+  <a href="#map-section" onclick="closeMobileNav()"><i class="fas fa-map-location-dot"></i> Map</a>
+  <a href="#budget" onclick="closeMobileNav()"><i class="fas fa-wallet"></i> Budget Planner</a>
+  <a href="#reviews" onclick="closeMobileNav()"><i class="fas fa-star"></i> Reviews</a>
+</div>
+
+<!-- ═══════════ MARQUEE ═══════════ -->
+<div class="marquee-bar">
+  <div class="marquee-track" id="mtrack">
+    <span><span class="live-dot"></span> Live Local Guide</span>
+    <span>✦ Budget Friendly</span>
+    <span>✦ Temple Suggestions by Day</span>
+    <span>✦ Live Weather Updates</span>
+    <span>✦ Biker Friendly Stops</span>
+    <span>✦ Authentic Andhra Food</span>
+    <span>✦ Scenic Viewpoints</span>
+    <span>✦ Interactive Map</span>
+    <span><span class="live-dot"></span> Live Local Guide</span>
+    <span>✦ Budget Friendly</span>
+    <span>✦ Temple Suggestions by Day</span>
+    <span>✦ Live Weather Updates</span>
+    <span>✦ Biker Friendly Stops</span>
+    <span>✦ Authentic Andhra Food</span>
+    <span>✦ Scenic Viewpoints</span>
+    <span>✦ Interactive Map</span>
+  </div>
+</div>
+
+<!-- ═══════════ HERO ═══════════ -->
+<section id="home" class="hero">
+  <div class="hero-bg-pattern"></div>
+
+  <!-- Mandala -->
+  <svg class="mandala-wrap" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g class="mandala-outer">
+      <circle cx="200" cy="200" r="195" stroke="white" stroke-width="0.8"/>
+      <circle cx="200" cy="200" r="165" stroke="white" stroke-width="0.5"/>
+      <circle cx="200" cy="200" r="135" stroke="white" stroke-width="0.8"/>
+      <circle cx="200" cy="200" r="105" stroke="white" stroke-width="0.5"/>
+      <circle cx="200" cy="200" r="75" stroke="white" stroke-width="0.8"/>
+      <circle cx="200" cy="200" r="45" stroke="white" stroke-width="0.5"/>
+      <line x1="200" y1="5" x2="200" y2="395" stroke="white" stroke-width="0.4"/>
+      <line x1="5" y1="200" x2="395" y2="200" stroke="white" stroke-width="0.4"/>
+      <line x1="55" y1="55" x2="345" y2="345" stroke="white" stroke-width="0.4"/>
+      <line x1="345" y1="55" x2="55" y2="345" stroke="white" stroke-width="0.4"/>
+    </g>
+    <g class="mandala-inner">
+      <polygon points="200,10 215,50 200,40 185,50" fill="white" opacity="0.7"/>
+      <polygon points="200,390 215,350 200,360 185,350" fill="white" opacity="0.7"/>
+      <polygon points="10,200 50,215 40,200 50,185" fill="white" opacity="0.7"/>
+      <polygon points="390,200 350,215 360,200 350,185" fill="white" opacity="0.7"/>
+    </g>
+  </svg>
+
+  <!-- Particles -->
+  <div id="particles"></div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow"><span class="live-dot"></span> Live Online Travel Guide</div>
+    <h1>Explore <em>Bhimavaram</em><br>Like a Local</h1>
+    <p class="hero-sub">Budget-smart. Culturally rich. Real-time ready.<br>Your complete guide to West Godavari's hidden gem.</p>
+
+    <!-- Weather Widget -->
+    <div class="weather-widget" onclick="fetchWeather()">
+      <div class="weather-icon" id="wIcon">🌤️</div>
+      <div>
+        <div class="weather-text" id="wText">Bhimavaram, AP</div>
+        <div class="weather-temp" id="wTemp">–– °C</div>
+        <div class="weather-refresh" id="wSub">Click to load live weather</div>
+      </div>
+    </div>
+
+    <div class="hero-pills">
+      <span class="hero-pill">🍛 Budget Food</span>
+      <span class="hero-pill">🛕 Sacred Temples</span>
+      <span class="hero-pill">🌅 Scenic Views</span>
+      <span class="hero-pill">🏍️ Biker Stops</span>
+      <span class="hero-pill">🗺️ Live Map</span>
+    </div>
+
+    <div class="hero-cta">
+      <a href="#food" class="btn-primary"><i class="fas fa-compass"></i> Start Exploring</a>
+      <a href="#budget" class="btn-outline"><i class="fas fa-wallet"></i> Plan Budget</a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon">🍽️</div><div class="stat-num">20+</div><div class="stat-label">Budget Eateries</div></div>
+      <div class="stat-card"><div class="stat-icon">🛕</div><div class="stat-num">12+</div><div class="stat-label">Sacred Temples</div></div>
+      <div class="stat-card"><div class="stat-icon">🌅</div><div class="stat-num">8+</div><div class="stat-label">Scenic Spots</div></div>
+      <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-num">4.8</div><div class="stat-label">Avg Rating</div></div>
+    </div>
+    <div class="live-feed">
+      <div class="live-feed-title"><span class="live-dot"></span> Recent Activity</div>
+      <div class="feed-item"><span class="feed-time">2m ago</span> Ramesh saved Bhimeswara Temple ⭐</div>
+      <div class="feed-item"><span class="feed-time">8m ago</span> Priya visited Gowri Meals 🍛</div>
+      <div class="feed-item"><span class="feed-time">15m ago</span> Ravi checked Kolleru Lake 🦩</div>
+      <div class="feed-item"><span class="feed-time">22m ago</span> Suresh planned ₹2000 trip 💰</div>
+    </div>
+  </div>
+</section>
+
+<!-- WHO IS THIS FOR -->
+<div class="who-section reveal">
+  <h2>Who Is This For? 🤔</h2>
+  <div class="who-grid">
+    <div class="who-card"><div class="who-icon">✈️</div><div class="who-title">Holiday Tourists</div><div class="who-desc">First-timers seeking authentic local experiences without overspending</div></div>
+    <div class="who-card"><div class="who-icon">🧳</div><div class="who-title">Employees on Leave</div><div class="who-desc">Returning home? Rediscover Bhimavaram with fresh eyes and a solid plan</div></div>
+    <div class="who-card"><div class="who-icon">🏍️</div><div class="who-title">Bikers & Riders</div><div class="who-desc">Quick stops, fuel points, and road-trip-friendly food on the highway</div></div>
+    <div class="who-card"><div class="who-icon">🚛</div><div class="who-title">Lorry Drivers</div><div class="who-desc">Reliable dhabas, parking info, and fast bites en route through AP</div></div>
+  </div>
+</div>
+
+<!-- ═══════════ FOOD SECTION ═══════════ -->
+<section id="food">
+  <div class="section-header reveal">
+    <div class="eyebrow">🍛 Eat Well, Spend Less</div>
+    <h2 class="sec-title">Budget-Friendly Eateries</h2>
+    <p class="sec-sub">Authentic Andhra flavours under ₹300 — filter by your budget and search by name</p>
+  </div>
+
+  <div class="controls-bar reveal">
+    <div class="filter-tabs">
+      <button class="ftab active" onclick="filterFood('all',this)">All</button>
+      <button class="ftab" onclick="filterFood(100,this)">Under ₹100</button>
+      <button class="ftab" onclick="filterFood(200,this)">Under ₹200</button>
+      <button class="ftab" onclick="filterFood(300,this)">Under ₹300</button>
+    </div>
+    <div class="section-search">
+      <i class="fas fa-search"></i>
+      <input type="text" id="foodSearch" placeholder="Search eateries…" oninput="searchFood(this.value)">
+    </div>
+  </div>
+
+  <div class="cards-grid" id="foodGrid"></div>
+
+  <div class="quick-stops-section reveal" style="margin-top:2rem;">
+    <div class="qs-title"><i class="fas fa-motorcycle"></i> Quick Stops for Bikers & Drivers</div>
+    <div class="qs-grid" id="qsGrid"></div>
+  </div>
+</section>
+
+<!-- ═══════════ TEMPLES ═══════════ -->
+<section id="temples">
+  <div class="section-header reveal">
+    <div class="eyebrow">🛕 Sacred & Spiritual</div>
+    <h2 class="sec-title">Temples & Heritage Sites</h2>
+    <p class="sec-sub">Discover Bhimavaram's ancient spiritual tapestry — smart day-based recommendations included</p>
+  </div>
+
+  <div class="today-temple-card reveal" id="todayCard"></div>
+
+  <div class="controls-bar reveal" style="margin-top:0;">
+    <div class="filter-tabs">
+      <button class="ftab active" onclick="filterTemples('all',this)">All Temples</button>
+      <button class="ftab" onclick="filterTemples('shiva',this)">Shiva</button>
+      <button class="ftab" onclick="filterTemples('devi',this)">Devi</button>
+      <button class="ftab" onclick="filterTemples('vishnu',this)">Vishnu</button>
+      <button class="ftab" onclick="filterTemples('other',this)">Other</button>
+    </div>
+    <div class="section-search">
+      <i class="fas fa-search"></i>
+      <input type="text" id="templeSearch" placeholder="Search temples…" oninput="searchTemples(this.value)">
+    </div>
+  </div>
+
+  <div class="temple-cards" id="templeGrid"></div>
+</section>
+
+<!-- ═══════════ VIEWPOINTS ═══════════ -->
+<section id="viewpoints">
+  <div class="section-header reveal">
+    <div class="eyebrow">🌅 Scenic & Serene</div>
+    <h2 class="sec-title">Viewpoints & Attractions</h2>
+    <p class="sec-sub">From Kolleru's flamingo shores to ancient fort ruins — West Godavari's best kept secrets</p>
+  </div>
+
+  <div class="controls-bar reveal">
+    <div class="filter-tabs">
+      <button class="ftab active" onclick="filterViews('all',this)">All</button>
+      <button class="ftab" onclick="filterViews('free',this)">Free Entry</button>
+      <button class="ftab" onclick="filterViews('peaceful',this)">Peaceful</button>
+      <button class="ftab" onclick="filterViews('photo',this)">Photo Worthy</button>
+    </div>
+    <div class="section-search">
+      <i class="fas fa-search"></i>
+      <input type="text" id="viewSearch" placeholder="Search spots…" oninput="searchViews(this.value)">
+    </div>
+  </div>
+
+  <div class="vc-wrap" id="viewGrid"></div>
+</section>
+
+<!-- ═══════════ MAP ═══════════ -->
+<section id="map-section">
+  <div class="section-header reveal">
+    <div class="eyebrow">🗺️ Navigate Smarter</div>
+    <h2 class="sec-title">Live Map Explorer</h2>
+    <p class="sec-sub">Browse Bhimavaram on a live map — tap a category to zoom in on that area</p>
+  </div>
+
+  <div class="map-wrap reveal">
+    <div class="map-sidebar">
+      <button class="map-filter-btn active" onclick="changeMap('center',this)"><i class="fas fa-city"></i><div><div class="mfb-label">Town Center</div><div class="mfb-count">All attractions</div></div></button>
+      <button class="map-filter-btn" onclick="changeMap('temple',this)"><i class="fas fa-gopuram"></i><div><div class="mfb-label">Temples Area</div><div class="mfb-count">Bhimeswara zone</div></div></button>
+      <button class="map-filter-btn" onclick="changeMap('food',this)"><i class="fas fa-utensils"></i><div><div class="mfb-label">Food Streets</div><div class="mfb-count">Market & Bus Stand</div></div></button>
+      <button class="map-filter-btn" onclick="changeMap('kolleru',this)"><i class="fas fa-water"></i><div><div class="mfb-label">Kolleru Lake</div><div class="mfb-count">18 km from town</div></div></button>
+      <button class="map-filter-btn" onclick="changeMap('river',this)"><i class="fas fa-fish"></i><div><div class="mfb-label">Godavari River</div><div class="mfb-count">Sunrise spot</div></div></button>
+    </div>
+    <div class="map-frame">
+      <iframe id="mapFrame"
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d30561.5!2d81.5212!3d16.5449!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a37c5e832f7a20d%3A0x5f5fe3be5b58f26f!2sBhimavaram%2C%20Andhra%20Pradesh!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
+        allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BUDGET PLANNER ═══════════ -->
+<section id="budget">
+  <div class="section-header reveal">
+    <div class="eyebrow">💰 Smart Travel Planning</div>
+    <h2 class="sec-title">AI Budget Planner</h2>
+    <p class="sec-sub">Enter your days and total budget — get a personalised Andhra itinerary instantly</p>
+  </div>
+
+  <div class="planner-container">
+    <div class="planner-card reveal">
+      <div class="planner-presets">
+        <button class="preset sel" onclick="applyPreset(1,500,this)">🎒 Day Trip ₹500</button>
+        <button class="preset" onclick="applyPreset(1,1000,this)">⭐ Comfort ₹1000/day</button>
+        <button class="preset" onclick="applyPreset(2,1500,this)">🌟 Weekend ₹1500</button>
+        <button class="preset" onclick="applyPreset(3,2000,this)">✨ Holiday ₹2000</button>
+        <button class="preset" onclick="applyPreset(5,5000,this)">👑 Full Week ₹5000</button>
+      </div>
+
+      <div class="planner-grid">
+        <div>
+          <label class="pf-label">📅 Number of Days</label>
+          <input class="pf-input" type="number" id="numDays" min="1" max="7" value="1">
+        </div>
+        <div>
+          <label class="pf-label">💵 Total Budget (₹)</label>
+          <input class="pf-input" type="number" id="totalBudget" value="500">
+        </div>
+        <div>
+          <label class="pf-label">🎯 Trip Style</label>
+          <select class="pf-select" id="tripStyle">
+            <option value="cultural">Cultural Explorer</option>
+            <option value="foodie">Foodie Tour</option>
+            <option value="spiritual">Spiritual Retreat</option>
+            <option value="nature">Nature & Scenic</option>
+          </select>
+        </div>
+        <div>
+          <label class="pf-label">👥 Travellers</label>
+          <select class="pf-select" id="travellers">
+            <option value="1">Solo</option>
+            <option value="2">Couple</option>
+            <option value="3">Family (3–4)</option>
+            <option value="5">Group (5+)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="traveler-row" onclick="toggleTraveler()">
+        <div class="ts-switch" id="tsToggle"><div class="ts-dot"></div></div>
+        <div class="ts-label">🏍️ Traveler Mode (Bikers & Lorry Drivers)<small>Quick stops, highway dhabas, parking-friendly plan</small></div>
+      </div>
+
+      <button class="gen-btn" onclick="generatePlan()"><i class="fas fa-magic"></i> Generate My Personalised Plan</button>
+    </div>
+
+    <div class="plan-out" id="planOut">
+      <div class="bbar-wrap">
+        <div class="bbar-labels"><span id="spentLabel">Estimated spend: ₹0</span><strong id="savedLabel">Saved: ₹0</strong></div>
+        <div class="bbar"><div class="bbar-fill" id="bbarFill"></div></div>
+      </div>
+      <div id="dayPlans"></div>
+      <div class="plan-footer">
+        <span id="pfLabel">0 days • 0 travellers</span>
+        <div style="display:flex;align-items:center;gap:0.8rem;">
+          <button class="share-btn" onclick="shareplan()"><i class="fas fa-share-nodes"></i> Share Plan</button>
+          <strong id="pfTotal">₹0</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ REVIEWS ═══════════ -->
+<section id="reviews">
+  <div class="section-header reveal">
+    <div class="eyebrow">⭐ Traveller Stories</div>
+    <h2 class="sec-title">What Visitors Say</h2>
+    <p class="sec-sub">Real experiences from real people who explored Bhimavaram on a budget</p>
+  </div>
+
+  <div class="reviews-grid" id="reviewsGrid"></div>
+
+  <div class="add-review-card reveal">
+    <div class="ar-title">✍️ Share Your Experience</div>
+    <div class="ar-grid">
+      <input class="ar-input" type="text" id="rvName" placeholder="Your name">
+      <input class="ar-input" type="text" id="rvFrom" placeholder="City you're from">
+    </div>
+    <select class="ar-sel" style="margin-bottom:1rem;" id="rvPlace">
+      <option value="">Select a place you visited</option>
+      <option>Bhimeswara Swamy Temple</option>
+      <option>Sri Lakshmi Tiffin Center</option>
+      <option>Kolleru Lake</option>
+      <option>Gowri Meals House</option>
+      <option>Pancharama Hill View</option>
+      <option>Other</option>
+    </select>
+    <div class="star-picker" id="starPicker" onclick="pickStar(event)">
+      <i class="fas fa-star" data-v="1"></i>
+      <i class="fas fa-star" data-v="2"></i>
+      <i class="fas fa-star" data-v="3"></i>
+      <i class="fas fa-star" data-v="4"></i>
+      <i class="fas fa-star" data-v="5"></i>
+    </div>
+    <textarea class="ar-textarea" id="rvText" placeholder="Tell us about your experience…"></textarea>
+    <button class="btn-primary" style="margin-top:1rem;" onclick="submitReview()"><i class="fas fa-paper-plane"></i> Post Review</button>
+  </div>
+</section>
+
+<!-- ═══════════ NEWSLETTER ═══════════ -->
+<div class="newsletter reveal">
+  <div class="nl-text">
+    <h3>📬 Stay Updated</h3>
+    <p>Get weekly tips, temple events, and budget deals from Bhimavaram</p>
+  </div>
+  <div class="nl-form">
+    <input class="nl-input" type="email" id="nlEmail" placeholder="your@email.com">
+    <button class="btn-primary" onclick="subscribeNL()"><i class="fas fa-bell"></i> Subscribe</button>
+  </div>
+</div>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <h3>🪷 Bhimavaram Explorer</h3>
+      <p>Your live, online travel companion for West Godavari's cultural capital. Budget-smart, locally curated, always up-to-date.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Explore</h4>
+      <a href="#food">Budget Food</a>
+      <a href="#temples">Temples</a>
+      <a href="#viewpoints">Viewpoints</a>
+      <a href="#map-section">Live Map</a>
+    </div>
+    <div class="footer-col">
+      <h4>Plan</h4>
+      <a href="#budget">Budget Planner</a>
+      <a href="#reviews">Reviews</a>
+      <a href="#home">Who Is This For</a>
+    </div>
+    <div class="footer-col">
+      <h4>Info</h4>
+      <a href="#">About the Project</a>
+      <a href="#">Emergency Contacts</a>
+      <a href="#">Suggest a Place</a>
+      <a href="#">Report an Error</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Bhimavaram Budget Explorer • Made with ❤️ for local travellers</p>
+    <div class="social-links">
+      <a class="soc-btn" href="#"><i class="fab fa-instagram"></i></a>
+      <a class="soc-btn" href="#"><i class="fab fa-youtube"></i></a>
+      <a class="soc-btn" href="#"><i class="fab fa-whatsapp"></i></a>
+      <a class="soc-btn" href="#"><i class="fab fa-twitter"></i></a>
+    </div>
+  </div>
+</footer>
+
+<!-- Back to top -->
+<button id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="fas fa-arrow-up"></i></button>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" style="position:relative;" id="modalBox">
+    <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════════════ */
+const foods = [
+  { id:1, name:"Sri Lakshmi Tiffin Center", type:"Tiffin", price:80,  timing:"6AM–11AM",  dish:"Pesarattu + Ginger Chutney",  loc:"Ramachandrarao St.", cat:"veg",    rating:4.8, popular:true,  reviews:142 },
+  { id:2, name:"Gowri Meals House",         type:"Meals",  price:120, timing:"11AM–3PM",  dish:"Full Andhra Meals Thali",     loc:"Bus Stand Road",     cat:"veg",    rating:4.6, popular:false, reviews:98  },
+  { id:3, name:"Balaji Tiffins",            type:"Tiffin", price:60,  timing:"6AM–10AM",  dish:"Idli Vada + Sambar",          loc:"Temple Street",      cat:"veg",    rating:4.5, popular:false, reviews:75  },
+  { id:4, name:"Krishna Mess",              type:"Meals",  price:90,  timing:"12PM–4PM",  dish:"Rice + Rasam + 3 Curries",   loc:"Market Lane",        cat:"veg",    rating:4.4, popular:false, reviews:61  },
+  { id:5, name:"Annapoorna Hotel",          type:"Full",   price:150, timing:"7AM–10PM",  dish:"Special Biryani",            loc:"Main Road",          cat:"nonveg", rating:4.7, popular:true,  reviews:210 },
+  { id:6, name:"Sai Snack Corner",          type:"Snacks", price:50,  timing:"4PM–9PM",   dish:"Bajji + Bonda Combo",        loc:"Near Clock Tower",   cat:"veg",    rating:4.3, popular:false, reviews:52  },
+  { id:7, name:"Ravi Biryani House",        type:"Biryani",price:200, timing:"12PM–9PM",  dish:"Chicken Biryani",            loc:"Station Road",       cat:"nonveg", rating:4.6, popular:true,  reviews:185 },
+  { id:8, name:"Durga Tiffin Center",       type:"Tiffin", price:70,  timing:"5:30AM–11AM",dish:"Upma + Vada",              loc:"Old Town",           cat:"veg",    rating:4.2, popular:false, reviews:44  },
+  { id:9, name:"Murali Dhaba",              type:"Meals",  price:100, timing:"10AM–4PM",  dish:"Meals + Buttermilk",         loc:"Highway Bypass",     cat:"veg",    rating:4.5, popular:false, reviews:88  },
+  {id:10, name:"Saraswathi Sweets",         type:"Sweets", price:80,  timing:"8AM–9PM",   dish:"Pootharekulu Special",       loc:"West End",           cat:"veg",    rating:4.9, popular:true,  reviews:320 }
+];
+
+const quickStops = [
+  { name:"Vishnu Dhaba",      info:"Highway Entry • 24/7 • Full Meals ₹80" },
+  { name:"Ramu Tea Stall",    info:"Bus Stand • 5AM–10PM • Tea ₹10" },
+  { name:"Srinivas Fast Food",info:"Main Road • Biryani ₹120" },
+  { name:"Anand Bakery",      info:"Town Centre • Snacks ₹30–60" },
+  { name:"Highway Meals",     info:"NH-16 • 24/7 • Meals ₹100" },
+  { name:"Subbarao Tiffins",  info:"Bypass Road • Tiffin ₹50" }
+];
+
+const DAY_TEMPLES = {
+  0:{ name:"Lakshmi Devi Temple",      icon:"🌸", desc:"Sunday is auspicious for Devi worship — receive the blessings of prosperity." },
+  1:{ name:"Bhimeswara Swamy Temple",  icon:"🙏", desc:"Monday belongs to Lord Shiva — visit the sacred Pancharama Kshetra." },
+  2:{ name:"Venkateswara Temple",      icon:"🌺", desc:"Tuesday is auspicious for Lord Vishnu — seek blessings at the hilltop." },
+  3:{ name:"Saraswathi Temple",        icon:"📚", desc:"Wednesday is Saraswathi's day — ideal for students and learners." },
+  4:{ name:"Venkateswara Temple",      icon:"🌺", desc:"Thursday is Lord Vishnu's special day — best time for moksha and peace." },
+  5:{ name:"Lakshmi Devi Temple",      icon:"🌸", desc:"Friday is the most auspicious for Goddess Lakshmi — largest crowds." },
+  6:{ name:"Hanuman Temple",           icon:"🚩", desc:"Saturday belongs to Lord Hanuman — devotees come for strength and protection." }
+};
+
+const temples = [
+  { id:1, name:"Bhimeswara Swamy Temple", deity:"Lord Shiva",     icon:"🙏", timing:"5AM–8PM", category:"shiva",  day:"Monday",    sig:"One of the five Pancharama Kshetras — most sacred Shiva shrine in AP" },
+  { id:2, name:"Someswara Temple",        deity:"Lord Shiva",     icon:"🔱", timing:"6AM–7PM", category:"shiva",  day:"Monday",    sig:"Ancient Chalukyan-era temple with breathtaking stone carvings" },
+  { id:3, name:"Lakshmi Devi Temple",     deity:"Goddess Lakshmi",icon:"🌸", timing:"6AM–8PM", category:"devi",   day:"Friday",    sig:"Famous for granting prosperity; special puja on Fridays draws thousands" },
+  { id:4, name:"Hanuman Temple",          deity:"Lord Hanuman",   icon:"🚩", timing:"5:30AM–8:30PM",category:"other",day:"Saturday",sig:"Most visited on Saturdays; believed to remove all obstacles from life" },
+  { id:5, name:"Saraswathi Temple",       deity:"Goddess Saraswathi",icon:"📚",timing:"7AM–6PM",category:"devi",  day:"Wednesday", sig:"Visited by students before exams; auspicious on Wednesdays" },
+  { id:6, name:"Venkateswara Temple",     deity:"Lord Vishnu",    icon:"🌺", timing:"6AM–7PM", category:"vishnu", day:"Thursday",  sig:"Peaceful hilltop temple with panoramic views of Bhimavaram town" },
+  { id:7, name:"Subrahmanyeswara Temple", deity:"Lord Murugan",   icon:"🌟", timing:"6AM–7PM", category:"other",  day:"Tuesday",   sig:"Famous for Karthika Masam festival; draws huge crowds in November" },
+  { id:8, name:"Rama Temple",             deity:"Lord Rama",      icon:"🏹", timing:"6:30AM–7:30PM",category:"vishnu",day:"Sunday",sig:"Serene temple complex ideal for meditation and morning prayers" }
+];
+
+const views = [
+  { name:"Kolleru Lake Viewpoint", type:"Lake",     emoji:"🦩", cat:"lake",    tags:["peaceful","photo","free"],  bestTime:"6AM–8AM",  entry:"Free", dist:"18 km", tip:"Visit at dawn for flamingo sightings and misty waters." },
+  { name:"Bhimavaram Town Park",   type:"Park",     emoji:"🌳", cat:"park",    tags:["peaceful","free"],          bestTime:"5AM–9AM",  entry:"Free", dist:"1.5 km",tip:"Perfect for an early morning walk before breakfast." },
+  { name:"Gouthami River Bank",    type:"River",    emoji:"🌊", cat:"river",   tags:["peaceful","photo","free"],  bestTime:"5:30AM–7AM",entry:"Free",dist:"8 km",  tip:"The sunrise over the Gouthami is absolutely breathtaking." },
+  { name:"Mogalturu Fort Ruins",   type:"Historic", emoji:"🏰", cat:"historic",tags:["photo"],                    bestTime:"7AM–5PM",  entry:"Free", dist:"22 km", tip:"Great for history buffs — ancient walls tell untold stories." },
+  { name:"Tallapudi Canal Walk",   type:"Canal",    emoji:"🛶", cat:"canal",   tags:["peaceful","free"],          bestTime:"6AM–7PM",  entry:"Free", dist:"5 km",  tip:"A calming canal-side walk popular among locals at dusk." },
+  { name:"Pancharama Hill View",   type:"Viewpoint",emoji:"⛰️", cat:"viewpt",  tags:["photo","paid"],             bestTime:"6AM–6PM",  entry:"₹10",  dist:"3 km",  tip:"Best panoramic view of the town — carry your camera!" }
+];
+
+const initReviews = [
+  { name:"Ramesh K.",   from:"Hyderabad",  avatar:"🧑", place:"Bhimeswara Swamy Temple", stars:5, text:"Absolutely divine experience. The temple architecture is stunning and the atmosphere is incredibly peaceful. Perfect start to my 4-day leave." },
+  { name:"Priya S.",    from:"Vijayawada", avatar:"👩", place:"Sri Lakshmi Tiffin Center",stars:5, text:"Best Pesarattu I've had outside my own kitchen! The ginger chutney was extraordinary. Only ₹80 for a full filling breakfast!" },
+  { name:"Kumar R.",    from:"Chennai",    avatar:"👨", place:"Kolleru Lake",             stars:4, text:"Arrived at 6AM and was rewarded with hundreds of flamingos. Absolutely worth the 18km drive. Bring mosquito repellent!" },
+  { name:"Anitha B.",   from:"Bangalore",  avatar:"🧕", place:"Gowri Meals House",        stars:5, text:"The most authentic Andhra full meals I've eaten in years. Everything from rasam to payasam was perfect. Incredible value at ₹120." },
+  { name:"Venkat M.",   from:"Nellore",    avatar:"🧔", place:"Pancharama Hill View",     stars:4, text:"The panoramic view is breathtaking at sunset. The ₹10 entry fee is nothing for what you get. Highly recommend bringing a camera." },
+  { name:"Divya T.",    from:"Pune",       avatar:"👩", place:"Saraswathi Temple",        stars:5, text:"Visited on a Wednesday for Saraswathi puja and the experience was unforgettable. Very well maintained and the priests are welcoming." }
+];
+
+let userReviews = [];
+let travelerMode = false;
+let starRating = 0;
+let currentFoodFilter = 'all';
+let currentFoodSearch = '';
+let currentTempleFilter = 'all';
+let currentTempleSearch = '';
+let currentViewFilter = 'all';
+let currentViewSearch = '';
+
+/* ═══════════════════════════════════════════════════
+   DARK MODE
+═══════════════════════════════════════════════════ */
+function toggleDark() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const theme = saved || (prefersDark ? 'dark' : 'light');
+  document.documentElement.setAttribute('data-theme', theme);
+}
+
+/* ═══════════════════════════════════════════════════
+   WEATHER (OpenWeatherMap free tier)
+═══════════════════════════════════════════════════ */
+async function fetchWeather() {
+  document.getElementById('wSub').textContent = 'Loading…';
+  try {
+    // Using Open-Meteo (no API key required)
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=16.5449&longitude=81.5212&current=temperature_2m,weathercode,windspeed_10m&timezone=Asia%2FKolkata');
+    const data = await res.json();
+    const temp = Math.round(data.current.temperature_2m);
+    const code = data.current.weathercode;
+    const wind = Math.round(data.current.windspeed_10m);
+
+    const icons = { 0:'☀️', 1:'🌤️', 2:'⛅', 3:'☁️', 45:'🌫️', 48:'🌫️', 51:'🌦️', 61:'🌧️', 80:'🌦️', 95:'⛈️' };
+    const conditions = { 0:'Clear sky', 1:'Mostly clear', 2:'Partly cloudy', 3:'Overcast', 45:'Foggy', 48:'Foggy', 51:'Light drizzle', 61:'Rainy', 80:'Showers', 95:'Thunderstorm' };
+    const icon = icons[code] || '🌤️';
+    const cond = conditions[code] || 'Partly cloudy';
+
+    document.getElementById('wIcon').textContent = icon;
+    document.getElementById('wTemp').textContent = `${temp} °C`;
+    document.getElementById('wText').textContent = `Bhimavaram, AP — ${cond}`;
+    document.getElementById('wSub').textContent = `Wind: ${wind} km/h • Updated now`;
+  } catch(e) {
+    document.getElementById('wSub').textContent = 'Could not load weather';
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   PARTICLES
+═══════════════════════════════════════════════════ */
+function createParticles() {
+  const container = document.getElementById('particles');
+  for(let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 10 + 4;
+    p.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%;
+      bottom:${Math.random()*20}%;
+      animation-duration:${6+Math.random()*10}s;
+      animation-delay:${Math.random()*6}s;
+      opacity:${0.2+Math.random()*0.4};
+    `;
+    container.appendChild(p);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDER FOOD
+═══════════════════════════════════════════════════ */
+function renderFood() {
+  const grid = document.getElementById('foodGrid');
+  let items = [...foods];
+
+  if(currentFoodFilter !== 'all') items = items.filter(f => f.price <= currentFoodFilter);
+  if(currentFoodSearch) items = items.filter(f =>
+    f.name.toLowerCase().includes(currentFoodSearch) ||
+    f.type.toLowerCase().includes(currentFoodSearch) ||
+    f.dish.toLowerCase().includes(currentFoodSearch)
+  );
+
+  if(!items.length) { grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-sub);padding:2rem;">No eateries found. Try a different filter.</p>'; return; }
+
+  grid.innerHTML = items.map(f => `
+    <div class="food-card" onclick="openFoodModal(${f.id})">
+      ${f.popular ? '<div class="ribbon">⭐ Popular</div>' : ''}
+      <div class="fc-header">
+        <div><div class="fc-name">${f.name}</div><div class="fc-type">${f.type}</div></div>
+        <div class="fc-badge">Avg ₹${f.price}</div>
+      </div>
+      <div class="fc-body">
+        <div class="fc-row"><i class="fas fa-clock" style="color:var(--saffron);font-size:.7rem;"></i> ${f.timing}</div>
+        <div class="fc-row"><i class="fas fa-location-dot" style="color:var(--saffron);font-size:.7rem;"></i> ${f.loc}</div>
+        <div class="fc-dish">⭐ Best: ${f.dish}</div>
+      </div>
+      <div class="fc-footer">
+        <div>
+          <div class="rating-stars">${'★'.repeat(Math.floor(f.rating))}${'☆'.repeat(5-Math.floor(f.rating))}</div>
+          <div class="rating-count">${f.rating} (${f.reviews} reviews)</div>
+        </div>
+        <span class="fc-tag ${f.cat === 'veg' ? 'tag-veg' : 'tag-nonveg'}">${f.cat === 'veg' ? '🟢 Veg' : '🔴 Non-Veg'}</span>
+      </div>
+    </div>
+  `).join('');
+
+  // Quick stops
+  document.getElementById('qsGrid').innerHTML = quickStops.map(q => `
+    <div class="qs-item"><strong>${q.name}</strong>${q.info}</div>
+  `).join('');
+}
+
+function filterFood(val, btn) {
+  document.querySelectorAll('#food .ftab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFoodFilter = val;
+  renderFood();
+}
+
+function searchFood(val) {
+  currentFoodSearch = val.toLowerCase();
+  renderFood();
+}
+
+function openFoodModal(id) {
+  const f = foods.find(x => x.id === id);
+  if(!f) return;
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-header">🍽️ ${f.name}</div>
+    <div style="background:linear-gradient(135deg,var(--saffron-d),var(--saffron));border-radius:12px;padding:1rem 1.3rem;margin-bottom:1.2rem;display:flex;justify-content:space-between;align-items:center;">
+      <div style="color:#fff;font-size:.85rem;">${f.type}</div>
+      <div style="background:var(--gold);color:#3d1e00;font-weight:700;padding:.3rem .8rem;border-radius:10px;font-size:.82rem;">Avg ₹${f.price}</div>
+    </div>
+    <div style="display:grid;gap:.6rem;margin-bottom:1.2rem;">
+      <div class="fc-row"><i class="fas fa-utensils" style="color:var(--saffron);"></i> <strong>Best Dish:</strong> ${f.dish}</div>
+      <div class="fc-row"><i class="fas fa-clock" style="color:var(--saffron);"></i> <strong>Timings:</strong> ${f.timing}</div>
+      <div class="fc-row"><i class="fas fa-location-dot" style="color:var(--saffron);"></i> <strong>Location:</strong> ${f.loc}</div>
+      <div class="fc-row"><i class="fas fa-star" style="color:var(--gold);"></i> <strong>Rating:</strong> ${f.rating}/5 (${f.reviews} reviews)</div>
+    </div>
+    <div style="background:var(--badge-bg);border-radius:10px;padding:1rem;font-size:.82rem;color:var(--text-sub);">
+      💡 <em>Tip: Visit early for fresh items. Weekdays are less crowded. Payment is cash only at most local spots.</em>
+    </div>
+    <a href="https://www.google.com/maps/search/${encodeURIComponent(f.name+' Bhimavaram')}" target="_blank" rel="noopener" class="btn-primary" style="margin-top:1.2rem;width:100%;justify-content:center;border-radius:10px;">
+      <i class="fas fa-map-location-dot"></i> View on Google Maps
+    </a>
+  `;
+  openModal();
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDER TEMPLES
+═══════════════════════════════════════════════════ */
+function renderTemples() {
+  // Today's card
+  const day = new Date().getDay();
+  const rec = DAY_TEMPLES[day];
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  document.getElementById('todayCard').innerHTML = `
+    <div class="tt-glow">${rec.icon}</div>
+    <div>
+      <div class="tt-label">✨ Today's Recommended Temple — ${days[day]}</div>
+      <div class="tt-name">${rec.name}</div>
+      <div class="tt-desc">${rec.desc}</div>
+    </div>
+  `;
+
+  // Temple grid
+  let items = [...temples];
+  if(currentTempleFilter !== 'all') items = items.filter(t => t.category === currentTempleFilter);
+  if(currentTempleSearch) items = items.filter(t =>
+    t.name.toLowerCase().includes(currentTempleSearch) ||
+    t.deity.toLowerCase().includes(currentTempleSearch)
+  );
+
+  const grid = document.getElementById('templeGrid');
+  if(!items.length) { grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-sub);padding:2rem;">No temples found.</p>'; return; }
+
+  grid.innerHTML = items.map(t => `
+    <div class="tc" onclick="openTempleModal(${t.id})">
+      <div class="tc-top">
+        <div class="tc-icon">${t.icon}</div>
+        <div><div class="tc-name">${t.name}</div><div class="tc-deity">${t.deity}</div></div>
+      </div>
+      <div class="tc-body">
+        <div class="tc-row"><i class="fas fa-clock"></i> ${t.timing}</div>
+        <div class="tc-row"><i class="fas fa-circle-info"></i> ${t.sig}</div>
+        <div class="tc-auspicious">⭐ Most auspicious on ${t.day}s</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterTemples(cat, btn) {
+  document.querySelectorAll('#temples .ftab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentTempleFilter = cat;
+  renderTemples();
+}
+
+function searchTemples(val) {
+  currentTempleSearch = val.toLowerCase();
+  renderTemples();
+}
+
+function openTempleModal(id) {
+  const t = temples.find(x => x.id === id);
+  if(!t) return;
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-header">${t.icon} ${t.name}</div>
+    <div style="background:linear-gradient(135deg,var(--deep-green),var(--green-mid));border-radius:12px;padding:1.2rem;margin-bottom:1.2rem;">
+      <div style="color:var(--gold-l);font-weight:700;font-size:.95rem;">${t.deity}</div>
+      <div style="color:rgba(240,230,208,.75);font-size:.78rem;margin-top:.3rem;">${t.sig}</div>
+    </div>
+    <div style="display:grid;gap:.6rem;margin-bottom:1.2rem;">
+      <div class="tc-row"><i class="fas fa-clock"></i> <strong>Timings:</strong> ${t.timing}</div>
+      <div class="tc-row"><i class="fas fa-calendar-star"></i> <strong>Best Day:</strong> ${t.day}</div>
+      <div class="tc-row"><i class="fas fa-shirt"></i> <strong>Dress Code:</strong> Traditional attire recommended</div>
+      <div class="tc-row"><i class="fas fa-camera-slash"></i> <strong>Photography:</strong> Not permitted inside sanctum</div>
+    </div>
+    <div style="background:rgba(212,160,23,.1);border:1px solid rgba(212,160,23,.2);border-radius:10px;padding:1rem;font-size:.82rem;color:var(--text-mid);">
+      💡 <em>Tip: Arrive 30 mins before opening for a queue-free darshan. Friday and ${t.day} evenings have special aartis.</em>
+    </div>
+    <a href="https://www.google.com/maps/search/${encodeURIComponent(t.name+' Bhimavaram')}" target="_blank" rel="noopener" class="btn-primary" style="margin-top:1.2rem;width:100%;justify-content:center;border-radius:10px;">
+      <i class="fas fa-map-location-dot"></i> View on Google Maps
+    </a>
+  `;
+  openModal();
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDER VIEWS
+═══════════════════════════════════════════════════ */
+function renderViews() {
+  let items = [...views];
+  if(currentViewFilter !== 'all') items = items.filter(v => v.tags.includes(currentViewFilter));
+  if(currentViewSearch) items = items.filter(v => v.name.toLowerCase().includes(currentViewSearch));
+
+  const grid = document.getElementById('viewGrid');
+  if(!items.length) { grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-sub);padding:2rem;">No viewpoints found.</p>'; return; }
+
+  grid.innerHTML = items.map(v => {
+    const tagMap = { peaceful:'<span class="vtag vtag-peaceful">🍃 Peaceful</span>', photo:'<span class="vtag vtag-photo">📸 Photo</span>', free:'<span class="vtag vtag-free">✅ Free</span>', paid:'<span class="vtag vtag-paid">🎟 Paid</span>' };
+    const tagsHTML = v.tags.map(t => tagMap[t] || '').join('');
+    return `
+      <div class="vc" onclick="openViewModal('${v.name}')">
+        <div class="vc-img ${v.cat}">
+          <div class="vc-tag-row">${tagsHTML}</div>
+          ${v.emoji}
+        </div>
+        <div class="vc-body">
+          <div class="vc-name">${v.name}</div>
+          <div class="vc-row"><i class="fas fa-tag"></i> ${v.type}</div>
+          <div class="vc-row"><i class="fas fa-clock"></i> Best: ${v.bestTime}</div>
+          <div class="vc-row"><i class="fas fa-location-dot"></i> ${v.dist} from centre</div>
+          <div class="vc-row"><i class="fas fa-ticket"></i> Entry: ${v.entry}</div>
+          <div class="vc-tip">💡 "${v.tip}"</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function filterViews(tag, btn) {
+  document.querySelectorAll('#viewpoints .ftab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentViewFilter = tag;
+  renderViews();
+}
+
+function searchViews(val) {
+  currentViewSearch = val.toLowerCase();
+  renderViews();
+}
+
+function openViewModal(name) {
+  const v = views.find(x => x.name === name);
+  if(!v) return;
+  const tagMap = { peaceful:'<span class="vtag vtag-peaceful">🍃 Peaceful</span>', photo:'<span class="vtag vtag-photo">📸 Photo</span>', free:'<span class="vtag vtag-free">✅ Free</span>', paid:'<span class="vtag vtag-paid">🎟 Paid</span>' };
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-header">${v.emoji} ${v.name}</div>
+    <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.2rem;">${v.tags.map(t=>tagMap[t]||'').join('')}</div>
+    <div style="display:grid;gap:.6rem;margin-bottom:1.2rem;">
+      <div class="vc-row"><i class="fas fa-tag"></i> <strong>Type:</strong> ${v.type}</div>
+      <div class="vc-row"><i class="fas fa-clock"></i> <strong>Best Time:</strong> ${v.bestTime}</div>
+      <div class="vc-row"><i class="fas fa-location-dot"></i> <strong>Distance:</strong> ${v.dist} from town centre</div>
+      <div class="vc-row"><i class="fas fa-ticket"></i> <strong>Entry Fee:</strong> ${v.entry}</div>
+      <div class="vc-row"><i class="fas fa-car"></i> <strong>Parking:</strong> Available nearby</div>
+    </div>
+    <div class="vc-tip" style="font-size:.85rem;">${v.tip}</div>
+    <a href="https://www.google.com/maps/search/${encodeURIComponent(v.name+' near Bhimavaram')}" target="_blank" rel="noopener" class="btn-primary" style="margin-top:1.2rem;width:100%;justify-content:center;border-radius:10px;">
+      <i class="fas fa-map-location-dot"></i> Get Directions
+    </a>
+  `;
+  openModal();
+}
+
+/* ═══════════════════════════════════════════════════
+   MAP
+═══════════════════════════════════════════════════ */
+const mapSrcs = {
+  center: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d30561.5!2d81.5212!3d16.5449!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a37c5e832f7a20d%3A0x5f5fe3be5b58f26f!2sBhimavaram%2C%20Andhra%20Pradesh!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin',
+  temple: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3827.0!2d81.5212!3d16.5449!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a37c5e832f7a20d%3A0x5f5fe3be5b58f26f!2sBhimeswara%20Swamy%20Temple!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin',
+  food:   'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1913.5!2d81.5200!3d16.5440!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a37c5e832f7a20d%3A0x5f5fe3be5b58f26f!2sBhimavaram%20Bus%20Stand!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin',
+  kolleru:'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d60000!2d81.2012!3d16.6000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a37e7a7a00e5e73%3A0xe6e70f2e3e3e3e3e!2sKolleru%20Lake!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin',
+  river:  'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d30000!2d81.7!3d16.54!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a37e!2sGodavari%20River!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin'
+};
+
+function changeMap(key, btn) {
+  document.querySelectorAll('.map-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const frame = document.getElementById('mapFrame');
+  frame.style.opacity = 0;
+  setTimeout(() => {
+    frame.src = mapSrcs[key] || mapSrcs.center;
+    frame.style.opacity = 1;
+  }, 300);
+}
+
+/* ═══════════════════════════════════════════════════
+   BUDGET PLANNER
+═══════════════════════════════════════════════════ */
+const styleData = {
+  cultural: {
+    morning:   [["🛕 Temple Visit + Prasad", 30], ["🛕 Heritage Site Tour", 20], ["🛕 Morning Aarti Visit", 0]],
+    afternoon: [["🍽️ Andhra Full Meals", 120], ["🏛 Local Museum", 50], ["🛕 Second Temple Visit", 30]],
+    evening:   [["🌅 Sunset at Viewpoint", 10], ["🧃 Local Juice + Snacks", 60], [" Evening Cultural Program", 100]]
+  },
+  foodie: {
+    morning:   [["🍛 Tiffin Breakfast Special", 80], ["☕ Filter Coffee Tour", 30], ["🥞 Upma & Vada Combo", 60]],
+    afternoon: [["🍽️ Special Biryani Lunch", 200], ["🍱 Thali Experience", 150], ["🥘 Regional Curry Tasting", 130]],
+    evening:   [["🍢 Bajji & Bonda Chaat", 60], ["🍬 Pootharekulu Sweets", 80], ["🌙 Street Food Walk", 100]]
+  },
+  spiritual: {
+    morning:   [["🛕 Sunrise Puja + Darshan", 0], ["🙏 Temple Meditation", 0], ["📿 Abhishekam Ritual", 50]],
+    afternoon: [["🍃 Prasad Meal at Temple", 30], ["📖 Spiritual Discourse", 0], ["🛕 Second Temple Visit", 20]],
+    evening:   [["🪔 Evening Aarti & Deepam", 0], ["🧘 River Bank Meditation", 0], ["🌙 Night Temple Lighting", 0]]
+  },
+  nature: {
+    morning:   [["🦩 Kolleru Lake Sunrise", 0], ["🌊 River Bank Walk", 0], ["🌳 Town Park Jogging", 0]],
+    afternoon: [["🌿 Canal Side Picnic", 50], ["⛰️ Hill Trek + View", 10], ["🏕️ Nature Exploration", 30]],
+    evening:   [["🌅 Sunset Viewpoint", 10], ["🌙 Stargazing Spot", 0], ["🔥 Riverside Bonfire", 80]]
+  }
+};
+
+const travelerData = {
+  morning:   [["⛽ Fuel Stop + Chai", 20], ["🍛 Highway Dhaba Breakfast", 80], ["🔧 Vehicle Check + Rest", 0]],
+  afternoon: [["🛑 Roadside Dine Stop", 0], ["🍽️ Quick Biryani Meal", 120], ["💤 AC Rest Stop", 50]],
+  evening:   [["☕ Tea Break + Snacks", 40], ["🛖 Dhaba Night Meal", 100], ["🏨 Budget Stay", 400]]
+};
+
+function applyPreset(days, budget, btn) {
+  document.getElementById('numDays').value = days;
+  document.getElementById('totalBudget').value = budget;
+  document.querySelectorAll('.preset').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+
+function toggleTraveler() {
+  travelerMode = !travelerMode;
+  document.getElementById('tsToggle').classList.toggle('on', travelerMode);
+}
+
+function generatePlan() {
+  const days    = Math.min(7, Math.max(1, parseInt(document.getElementById('numDays').value) || 1));
+  const budget  = parseInt(document.getElementById('totalBudget').value) || 500;
+  const style   = document.getElementById('tripStyle').value;
+  const count   = parseInt(document.getElementById('travellers').value) || 1;
+  const perDay  = Math.floor(budget / days);
+  const acts    = travelerMode ? travelerData : styleData[style];
+
+  let totalSpent = 0;
+  let daysHTML = '';
+
+  for(let d = 1; d <= days; d++) {
+    const morning   = travelerMode ? acts.morning  [d%acts.morning.length]   : acts.morning  [d%acts.morning.length];
+    const afternoon = travelerMode ? acts.afternoon[d%acts.afternoon.length] : acts.afternoon[d%acts.afternoon.length];
+    const evening   = travelerMode ? acts.evening  [d%acts.evening.length]   : acts.evening  [d%acts.evening.length];
+
+    const dayCost = (morning[1] + afternoon[1] + evening[1]) * count;
+    totalSpent += dayCost;
+
+    daysHTML += `
+      <div class="day-block">
+        <div class="day-block-header">📅 Day ${d} <small>— Est. ₹${dayCost} for ${count > 1 ? count + ' people' : 'you'}</small></div>
+        <div class="slot">
+          <div class="slot-l"><span class="slot-time">🌅 Morning</span><span class="slot-act">${morning[0]}</span></div>
+          ${morning[1] > 0 ? `<span class="slot-cost">₹${morning[1]*count}</span>` : '<span class="slot-free">Free</span>'}
+        </div>
+        <div class="slot">
+          <div class="slot-l"><span class="slot-time">☀️ Afternoon</span><span class="slot-act">${afternoon[0]}</span></div>
+          ${afternoon[1] > 0 ? `<span class="slot-cost">₹${afternoon[1]*count}</span>` : '<span class="slot-free">Free</span>'}
+        </div>
+        <div class="slot">
+          <div class="slot-l"><span class="slot-time">🌙 Evening</span><span class="slot-act">${evening[0]}</span></div>
+          ${evening[1] > 0 ? `<span class="slot-cost">₹${evening[1]*count}</span>` : '<span class="slot-free">Free</span>'}
+        </div>
+      </div>
+    `;
+  }
+
+  const pct = Math.min(100, Math.round(totalSpent / budget * 100));
+  const saved = Math.max(0, budget - totalSpent);
+  const travellers = ['Solo','Couple','Family','Group'][Math.log2(count)] || `${count} people`;
+
+  document.getElementById('spentLabel').textContent = `Estimated spend: ₹${totalSpent}`;
+  document.getElementById('savedLabel').textContent  = `Saved: ₹${saved}`;
+  document.getElementById('dayPlans').innerHTML = daysHTML;
+  document.getElementById('pfLabel').textContent = `${days} day${days>1?'s':''} • ${travellers}`;
+  document.getElementById('pfTotal').textContent = `₹${budget} budget`;
+
+  const fill = document.getElementById('bbarFill');
+  fill.style.width = '0';
+  setTimeout(() => fill.style.width = pct + '%', 50);
+
+  const out = document.getElementById('planOut');
+  out.classList.add('show');
+  setTimeout(() => out.scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
+}
+
+function shareplan() {
+  const days   = document.getElementById('numDays').value;
+  const budget = document.getElementById('totalBudget').value;
+  const text   = `Check out my Bhimavaram travel plan: ${days} day(s) for ₹${budget}!\nPlan your trip at bhimavaramexplorer.in`;
+  if(navigator.share) {
+    navigator.share({ title:'Bhimavaram Budget Plan', text });
+  } else {
+    navigator.clipboard.writeText(text);
+    showToast('📋 Plan copied to clipboard!');
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   REVIEWS
+═══════════════════════════════════════════════════ */
+const avatarColors = ['#E8630A','#D4A017','#2E6B44','#1A4A2E','#5C3A1E','#4A9660'];
+
+function renderReviews() {
+  const all = [...initReviews, ...userReviews].reverse();
+  const grid = document.getElementById('reviewsGrid');
+  grid.innerHTML = all.map((r,i) => `
+    <div class="review-card reveal">
+      <div class="rv-top">
+        <div class="rv-avatar" style="background:${avatarColors[i%avatarColors.length]}20;border:2px solid ${avatarColors[i%avatarColors.length]}40;">${r.avatar || '🧑'}</div>
+        <div>
+          <div class="rv-name">${r.name}</div>
+          <div class="rv-from">📍 From ${r.from}</div>
+        </div>
+      </div>
+      <div class="rv-stars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div>
+      <div class="rv-text">"${r.text}"</div>
+      <div class="rv-place"><i class="fas fa-location-dot"></i> ${r.place}</div>
+    </div>
+  `).join('');
+  observeReveal();
+}
+
+function pickStar(e) {
+  const star = e.target.closest('[data-v]');
+  if(!star) return;
+  starRating = parseInt(star.dataset.v);
+  document.querySelectorAll('#starPicker i').forEach((s,i) => s.classList.toggle('lit', i < starRating));
+}
+
+function submitReview() {
+  const name  = document.getElementById('rvName').value.trim();
+  const from  = document.getElementById('rvFrom').value.trim();
+  const place = document.getElementById('rvPlace').value;
+  const text  = document.getElementById('rvText').value.trim();
+
+  if(!name || !from || !place || !text || !starRating) { showToast('⚠️ Please fill all fields and select a rating.'); return; }
+
+  userReviews.push({ name, from, avatar:'⭐', place, stars:starRating, text });
+  renderReviews();
+
+  // reset
+  document.getElementById('rvName').value = '';
+  document.getElementById('rvFrom').value = '';
+  document.getElementById('rvPlace').value = '';
+  document.getElementById('rvText').value = '';
+  document.getElementById('starPicker').querySelectorAll('i').forEach(s => s.classList.remove('lit'));
+  starRating = 0;
+  showToast('✅ Review posted! Thank you for sharing.');
+}
+
+/* ═══════════════════════════════════════════════════
+   GLOBAL SEARCH
+═══════════════════════════════════════════════════ */
+function globalSearchFn(val) {
+  if(!val.trim()) return;
+  const q = val.toLowerCase();
+
+  const foodMatches  = foods.filter(f => f.name.toLowerCase().includes(q) || f.dish.toLowerCase().includes(q));
+  const templeMatches= temples.filter(t => t.name.toLowerCase().includes(q) || t.deity.toLowerCase().includes(q));
+  const viewMatches  = views.filter(v => v.name.toLowerCase().includes(q));
+
+  if(foodMatches.length) {
+    document.getElementById('foodSearch').value = val;
+    currentFoodSearch = q; renderFood();
+    document.getElementById('food').scrollIntoView({ behavior:'smooth' });
+  } else if(templeMatches.length) {
+    document.getElementById('templeSearch').value = val;
+    currentTempleSearch = q; renderTemples();
+    document.getElementById('temples').scrollIntoView({ behavior:'smooth' });
+  } else if(viewMatches.length) {
+    document.getElementById('viewSearch').value = val;
+    currentViewSearch = q; renderViews();
+    document.getElementById('viewpoints').scrollIntoView({ behavior:'smooth' });
+  } else {
+    showToast(`🔍 No results for "${val}"`);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   NEWSLETTER
+═══════════════════════════════════════════════════ */
+function subscribeNL() {
+  const email = document.getElementById('nlEmail').value.trim();
+  if(!email || !email.includes('@')) { showToast('⚠️ Enter a valid email address.'); return; }
+  document.getElementById('nlEmail').value = '';
+  showToast('🎉 Subscribed! You\'ll get Bhimavaram updates soon.');
+}
+
+/* ═══════════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════════ */
+function openModal() { document.getElementById('modalOverlay').classList.add('open'); }
+function closeModal(e) {
+  if(!e || e.target === document.getElementById('modalOverlay') || e.currentTarget.classList.contains('modal-close')) {
+    document.getElementById('modalOverlay').classList.remove('open');
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════ */
+let toastTimer;
+function showToast(msg) {
+  clearTimeout(toastTimer);
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ═══════════════════════════════════════════════════
+   MOBILE NAV
+═══════════════════════════════════════════════════ */
+function toggleMobileNav() { document.getElementById('mobileNav').classList.toggle('open'); }
+function closeMobileNav()  { document.getElementById('mobileNav').classList.remove('open'); }
+
+/* ═══════════════════════════════════════════════════
+   SCROLL ANIMATIONS + NAV ACTIVE
+═══════════════════════════════════════════════════ */
+function observeReveal() {
+  const els = document.querySelectorAll('.reveal:not(.visible)');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+  }, { threshold:0.12 });
+  els.forEach(el => io.observe(el));
+}
+
+window.addEventListener('scroll', () => {
+  // Back to top
+  document.getElementById('backTop').classList.toggle('show', window.scrollY > 400);
+
+  // Nav active highlight
+  const sections = ['home','food','temples','viewpoints','map-section','budget','reviews'];
+  const navLinks = document.querySelectorAll('.nav-center a');
+  let current = 'home';
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if(el && window.scrollY >= el.offsetTop - 100) current = id;
+  });
+  navLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+});
+
+/* ═══════════════════════════════════════════════════
+   LIVE FEED TICKER
+═══════════════════════════════════════════════════ */
+const feedLines = [
+  "Ramesh saved Bhimeswara Temple ⭐",
+  "Priya visited Gowri Meals 🍛",
+  "Ravi checked Kolleru Lake 🦩",
+  "Suresh planned ₹2000 trip 💰",
+  "Meena reviewed Lakshmi Tiffins 🌟",
+  "Arun bookmarked Pancharama View 📸",
+  "Kavitha shared her weekend plan 📋",
+  "Ganesh found ₹80 meals near temple 🙏"
+];
+let feedIdx = 0;
+function tickFeed() {
+  const items = document.querySelectorAll('.feed-item');
+  if(!items.length) return;
+  const last = items[items.length - 1];
+  feedIdx = (feedIdx + 1) % feedLines.length;
+  const mins = Math.floor(Math.random() * 5) + 1;
+  last.innerHTML = `<span class="feed-time">${mins}m ago</span> ${feedLines[feedIdx]}`;
+}
+
+/* ═══════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  createParticles();
+  renderFood();
+  renderTemples();
+  renderViews();
+  renderReviews();
+  observeReveal();
+  fetchWeather();
+  setInterval(tickFeed, 5000);
+
+  // Map iframe fade transition style
+  const mf = document.getElementById('mapFrame');
+  mf.style.transition = 'opacity .3s';
+});
+
+// Close mobile nav on outside click
+document.addEventListener('click', (e) => {
+  const nav = document.getElementById('mobileNav');
+  const hamburger = document.querySelector('.hamburger');
+  if(nav.classList.contains('open') && !nav.contains(e.target) && !hamburger.contains(e.target)) {
+    closeMobileNav();
+  }
+});
+</script>
+</body>
+</html>
