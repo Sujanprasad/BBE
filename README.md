@@ -248,7 +248,7 @@ This project is created for student activity purpose, feel free to use it
 
 # 👨‍💻 Author
 
-## SUJAN & NARENDRA
+## SUJAN PRASAD & NARENDRA
 
 Frontend Developers • UI/UX Enthusiast • Creative Web Designers
 
