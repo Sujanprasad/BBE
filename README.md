@@ -248,9 +248,9 @@ This project is created for student activity purpose, feel free to use it
 
 # 👨‍💻 Author
 
-## Frank
+## SUJAN & NARENDRA
 
-Frontend Developer • UI/UX Enthusiast • Creative Web Designer
+Frontend Developers • UI/UX Enthusiast • Creative Web Designers
 
 ---
 
