@@ -27,6 +27,7 @@ The project combines **modern UI/UX**, smooth animations, responsive layouts, an
 - Budget filters (₹100 / ₹200 / ₹300)
 - Ratings & category badges
 - Biker-friendly quick stops
+- Best Food Spots
 
 ## 🛕 Temple Recommendations
 - Smart temple categorization
